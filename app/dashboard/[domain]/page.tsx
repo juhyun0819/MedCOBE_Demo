@@ -174,6 +174,8 @@ export default function DashboardPage({ params }: { params: { domain: string } }
   const [displayedMessages, setDisplayedMessages] = useState<number>(0) // 현재까지 표시된 메시지 수
   const [typingProgress, setTypingProgress] = useState<Record<number, number>>({}) // 각 메시지의 타이핑 진행도 (인덱스 -> 표시된 단어 수)
   const [isTyping, setIsTyping] = useState<Record<number, boolean>>({}) // 각 메시지의 타이핑 완료 여부
+  const [isUserScrolling, setIsUserScrolling] = useState<boolean>(false) // 사용자가 수동으로 스크롤 중인지
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null) // 스크롤 타이머
   
   // 스크롤을 위한 ref
   const chatLogCardRef = useRef<HTMLDivElement>(null)
@@ -324,31 +326,95 @@ export default function DashboardPage({ params }: { params: { domain: string } }
     }
   }, [isSubmitted, chatDialogue.length])
 
-  // 새로운 메시지가 나타날 때마다 스크롤
+  // 사용자 스크롤 감지 (페이지 전체 및 채팅 메시지 컨테이너)
   useEffect(() => {
-    if (displayedMessages > 0 && lastMessageRef.current) {
+    let lastScrollTop = 0
+    
+    const handleScroll = () => {
+      setIsUserScrolling(true)
+      
+      // 스크롤이 멈춘 후 1초 뒤에 자동 스크롤 재개
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current)
+      }
+      
+      scrollTimeoutRef.current = setTimeout(() => {
+        setIsUserScrolling(false)
+      }, 1000) // 1초 동안 스크롤이 없으면 자동 스크롤 재개
+    }
+
+    const handleWheel = (e: WheelEvent) => {
+      // 사용자가 위로 스크롤하려고 하면 자동 스크롤 중단
+      if (e.deltaY < 0) {
+        setIsUserScrolling(true)
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current)
+        }
+        scrollTimeoutRef.current = setTimeout(() => {
+          setIsUserScrolling(false)
+        }, 2000) // 위로 스크롤 시 2초 동안 자동 스크롤 중단
+      } else {
+        handleScroll()
+      }
+    }
+
+    // 페이지 전체 스크롤 감지
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('wheel', handleWheel, { passive: true })
+    window.addEventListener('touchmove', handleScroll, { passive: true })
+
+    // 채팅 메시지 컨테이너 스크롤 감지
+    const chatContainer = chatMessagesRef.current
+    if (chatContainer) {
+      chatContainer.addEventListener('scroll', handleScroll)
+      chatContainer.addEventListener('wheel', handleWheel, { passive: true })
+      chatContainer.addEventListener('touchmove', handleScroll, { passive: true })
+    }
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('wheel', handleWheel)
+      window.removeEventListener('touchmove', handleScroll)
+      if (chatContainer) {
+        chatContainer.removeEventListener('scroll', handleScroll)
+        chatContainer.removeEventListener('wheel', handleWheel)
+        chatContainer.removeEventListener('touchmove', handleScroll)
+      }
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current)
+      }
+    }
+  }, [])
+
+  // 새로운 메시지가 나타날 때마다 스크롤 (사용자가 스크롤 중이 아닐 때만)
+  useEffect(() => {
+    if (displayedMessages > 0 && lastMessageRef.current && !isUserScrolling) {
       // 약간의 지연을 두고 스크롤 (메시지가 렌더링된 후)
       setTimeout(() => {
-        lastMessageRef.current?.scrollIntoView({ 
-          behavior: "smooth", 
-          block: "end" 
-        })
+        if (!isUserScrolling && lastMessageRef.current) {
+          lastMessageRef.current.scrollIntoView({ 
+            behavior: "smooth", 
+            block: "end" 
+          })
+        }
       }, 100)
     }
-  }, [displayedMessages])
+  }, [displayedMessages, isUserScrolling])
 
-  // 타이핑 진행 중에도 스크롤 업데이트
+  // 타이핑 진행 중에도 스크롤 업데이트 (사용자가 스크롤 중이 아닐 때만)
   useEffect(() => {
-    if (lastMessageRef.current && Object.keys(typingProgress).length > 0) {
+    if (lastMessageRef.current && Object.keys(typingProgress).length > 0 && !isUserScrolling) {
       // 타이핑이 진행 중일 때 스크롤 업데이트
       setTimeout(() => {
-        lastMessageRef.current?.scrollIntoView({ 
-          behavior: "smooth", 
-          block: "end" 
-        })
+        if (!isUserScrolling && lastMessageRef.current) {
+          lastMessageRef.current.scrollIntoView({ 
+            behavior: "smooth", 
+            block: "end" 
+          })
+        }
       }, 50)
     }
-  }, [typingProgress])
+  }, [typingProgress, isUserScrolling])
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
@@ -566,30 +632,48 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                           </SelectValue>
                         </SelectTrigger>
                         <SelectContent className="neumorphic bg-card">
-                          {Object.entries(modelConfig).map(([key, config]) => (
-                            <SelectItem key={key} value={key}>
-                              <div className="flex items-center gap-2">
-                                {isDark ? (
-                                  <Image
-                                    src={config.imageDark}
-                                    alt={config.alt}
-                                    width={20}
-                                    height={20}
-                                    className="object-contain"
-                                  />
-                                ) : (
-                                  <Image
-                                    src={config.imageLight}
-                                    alt={config.alt}
-                                    width={20}
-                                    height={20}
-                                    className="object-contain"
-                                  />
-                                )}
-                                <span>{config.displayName}</span>
-                              </div>
-                            </SelectItem>
-                          ))}
+                          {/* 모델 순서를 명시적으로 지정 */}
+                          {[
+                            "GPT-5",
+                            "GPT-4o",
+                            "GPT-4o-mini",
+                            "GPT-3.5-turbo",
+                            "Claude-Opus-4.5",
+                            "Claude-Sonnet-4.5",
+                            "Claude-Haiku-4.5",
+                            "Llama-3.3-70B",
+                            "Llama-3.1-8B",
+                            "Qwen-2.5-72B",
+                            "Mistral-Large",
+                            "Phi-4",
+                          ].map((key) => {
+                            const config = modelConfig[key]
+                            if (!config) return null
+                            return (
+                              <SelectItem key={key} value={key}>
+                                <div className="flex items-center gap-2">
+                                  {isDark ? (
+                                    <Image
+                                      src={config.imageDark}
+                                      alt={config.alt}
+                                      width={20}
+                                      height={20}
+                                      className="object-contain"
+                                    />
+                                  ) : (
+                                    <Image
+                                      src={config.imageLight}
+                                      alt={config.alt}
+                                      width={20}
+                                      height={20}
+                                      className="object-contain"
+                                    />
+                                  )}
+                                  <span>{config.displayName}</span>
+                                </div>
+                              </SelectItem>
+                            )
+                          }).filter(Boolean)}
                         </SelectContent>
                       </Select>
                     </CardContent>
