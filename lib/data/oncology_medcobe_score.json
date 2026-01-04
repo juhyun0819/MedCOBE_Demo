@@ -1,0 +1,52 @@
+{
+  "scores": [
+    {
+      "modelName": "GPT-5",
+      "score": 0.686348585024614
+    },
+    {
+      "modelName": "GPT-4o",
+      "score": 0.590714808776301
+    },
+    {
+      "modelName": "GPT-4o-mini",
+      "score": 0.352089395109765
+    },
+    {
+      "modelName": "GPT-3.5-turbo",
+      "score": 0.222680885707562
+    },
+    {
+      "modelName": "Claude-Sonnet-4.5",
+      "score": 0.606060606060606
+    },
+    {
+      "modelName": "Claude-Haiku-4.5",
+      "score": 0.226767114349936
+    },
+    {
+      "modelName": "Claude-Opus-4.5",
+      "score": 0.676303455289387
+    },
+    {
+      "modelName": "Llama-3.3-70B",
+      "score": 0.416597790450531
+    },
+    {
+      "modelName": "Llama-3.1-8B",
+      "score": 0.0801742821534724
+    },
+    {
+      "modelName": "Qwen-2.5-72B",
+      "score": 0.445361771415123
+    },
+    {
+      "modelName": "Phi-4",
+      "score": 0.29535740438815
+    },
+    {
+      "modelName": "Mistral-Large",
+      "score": 0.524863881081478
+    }
+  ]
+}
