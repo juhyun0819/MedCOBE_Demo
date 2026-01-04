@@ -54,7 +54,7 @@ import {
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 
 
 
@@ -148,6 +148,20 @@ export default function DashboardPage({ params }: { params: { domain: string } }
   } | null>(null)
   const [selectedOption, setSelectedOption] = useState<string>("")
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false)
+  
+  // 채팅 로그 데이터
+  const [chatDialogue, setChatDialogue] = useState<Array<{
+    role: string
+    content: string
+  }>>([])
+  const [displayedMessages, setDisplayedMessages] = useState<number>(0) // 현재까지 표시된 메시지 수
+  const [typingProgress, setTypingProgress] = useState<Record<number, number>>({}) // 각 메시지의 타이핑 진행도 (인덱스 -> 표시된 단어 수)
+  const [isTyping, setIsTyping] = useState<Record<number, boolean>>({}) // 각 메시지의 타이핑 완료 여부
+  
+  // 스크롤을 위한 ref
+  const chatLogCardRef = useRef<HTMLDivElement>(null)
+  const chatMessagesRef = useRef<HTMLDivElement>(null)
+  const lastMessageRef = useRef<HTMLDivElement>(null)
 
   // Excel 파일에서 데이터 가져오기 (도메인별로 다른 데이터)
   useEffect(() => {
@@ -241,21 +255,68 @@ export default function DashboardPage({ params }: { params: { domain: string } }
           setQuestion(data.question)
           setSelectedOption("") // 도메인 변경 시 선택 초기화
           setIsSubmitted(false) // 도메인 변경 시 제출 상태 초기화
+          setChatDialogue([]) // 채팅 로그 초기화
+          setDisplayedMessages(0) // 표시된 메시지 수 초기화
         } else {
           setQuestion(null)
           setSelectedOption("")
           setIsSubmitted(false)
+          setChatDialogue([])
+          setDisplayedMessages(0)
+          setTypingProgress({})
+          setIsTyping({})
         }
       } catch (error) {
         console.error("Error fetching question:", error)
         setQuestion(null)
         setSelectedOption("")
         setIsSubmitted(false)
+        setChatDialogue([])
+        setDisplayedMessages(0)
       }
     }
 
     fetchQuestion()
   }, [selectedDomain]) // selectedDomain이 변경될 때마다 질문 다시 가져오기
+
+  // 채팅 로그 카드가 나타날 때 스크롤
+  useEffect(() => {
+    if (isSubmitted && chatDialogue.length > 0 && chatLogCardRef.current) {
+      // 약간의 지연을 두고 스크롤 (카드가 렌더링된 후)
+      setTimeout(() => {
+        chatLogCardRef.current?.scrollIntoView({ 
+          behavior: "smooth", 
+          block: "start" 
+        })
+      }, 100)
+    }
+  }, [isSubmitted, chatDialogue.length])
+
+  // 새로운 메시지가 나타날 때마다 스크롤
+  useEffect(() => {
+    if (displayedMessages > 0 && lastMessageRef.current) {
+      // 약간의 지연을 두고 스크롤 (메시지가 렌더링된 후)
+      setTimeout(() => {
+        lastMessageRef.current?.scrollIntoView({ 
+          behavior: "smooth", 
+          block: "end" 
+        })
+      }, 100)
+    }
+  }, [displayedMessages])
+
+  // 타이핑 진행 중에도 스크롤 업데이트
+  useEffect(() => {
+    if (lastMessageRef.current && Object.keys(typingProgress).length > 0) {
+      // 타이핑이 진행 중일 때 스크롤 업데이트
+      setTimeout(() => {
+        lastMessageRef.current?.scrollIntoView({ 
+          behavior: "smooth", 
+          block: "end" 
+        })
+      }, 50)
+    }
+  }, [typingProgress])
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
@@ -547,9 +608,102 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                           {/* 제출 버튼 */}
                           <div className="flex justify-end pt-2">
                             <Button
-                              onClick={() => {
-                                if (selectedOption) {
+                              onClick={async () => {
+                                if (selectedOption && question?.case_id) {
                                   setIsSubmitted(true)
+                                  
+                                  // 채팅 로그 가져오기
+                                  try {
+                                    const response = await fetch(
+                                      `/api/chat-log?domain=${selectedDomain}&selectedOption=${selectedOption}&caseId=${question.case_id}`
+                                    )
+                                    const data = await response.json()
+                                    
+                                    console.log("Chat log API response:", data)
+                                    
+                                    if (data.error) {
+                                      console.error("API error:", data.error)
+                                      // 에러가 있어도 빈 배열로 설정하여 로딩 상태 해제
+                                      setChatDialogue([])
+                                      setDisplayedMessages(0)
+                                    } else if (data.dialogue && Array.isArray(data.dialogue)) {
+                                      console.log("Setting dialogue:", data.dialogue.length, "messages")
+                                      setChatDialogue(data.dialogue)
+                                      setDisplayedMessages(0) // 처음부터 시작
+                                      setTypingProgress({}) // 타이핑 진행도 초기화
+                                      setIsTyping({}) // 타이핑 상태 초기화
+                                      
+                                      // 첫 번째 메시지 표시
+                                      let currentMessageIndex = 0
+                                      
+                                      const showNextMessage = (index: number) => {
+                                        if (index >= data.dialogue.length) return
+                                        
+                                        setDisplayedMessages(index + 1)
+                                        
+                                        const message = data.dialogue[index]
+                                        
+                                        // AI 메시지인 경우 타이핑 애니메이션 시작
+                                        if (message.role === "AI") {
+                                          const messageContent = message.content || ""
+                                          const words = messageContent.split(/(\s+)/) // 공백 포함하여 단어 분리
+                                          const wordsPerChunk = 3 // 한 번에 표시할 단어 수
+                                          const typingSpeed = 50 // 밀리초 (더 빠르게)
+                                          
+                                          setIsTyping((prev) => ({ ...prev, [index]: true }))
+                                          
+                                          // 여러 단어씩 묶어서 표시
+                                          const totalChunks = Math.ceil(words.length / wordsPerChunk)
+                                          
+                                          for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+                                            setTimeout(() => {
+                                              const wordsToShow = Math.min((chunkIndex + 1) * wordsPerChunk, words.length)
+                                              setTypingProgress((prev) => ({
+                                                ...prev,
+                                                [index]: wordsToShow
+                                              }))
+                                              
+                                              // 마지막 청크인 경우 타이핑 완료 처리
+                                              if (chunkIndex === totalChunks - 1) {
+                                                setIsTyping((prev) => ({ ...prev, [index]: false }))
+                                                
+                                                // 타이핑 완료 후 다음 메시지 표시
+                                                setTimeout(() => {
+                                                  showNextMessage(index + 1)
+                                                }, 1000) // 타이핑 완료 후 1초 대기
+                                              }
+                                            }, chunkIndex * typingSpeed)
+                                          }
+                                        } else {
+                                          // Doctor 메시지는 즉시 표시
+                                          const messageContent = message.content || ""
+                                          const words = messageContent.split(/(\s+)/)
+                                          
+                                          setTypingProgress((prev) => ({
+                                            ...prev,
+                                            [index]: words.length
+                                          }))
+                                          setIsTyping((prev) => ({ ...prev, [index]: false }))
+                                          
+                                          // Doctor 메시지 표시 후 다음 메시지 표시
+                                          setTimeout(() => {
+                                            showNextMessage(index + 1)
+                                          }, 300) // 짧은 대기 후 다음 메시지
+                                        }
+                                      }
+                                      
+                                      // 첫 번째 메시지부터 시작
+                                      showNextMessage(0)
+                                    } else {
+                                      console.error("Invalid dialogue data:", data)
+                                      setChatDialogue([])
+                                      setDisplayedMessages(0)
+                                    }
+                                  } catch (error) {
+                                    console.error("Error fetching chat log:", error)
+                                    setChatDialogue([])
+                                    setDisplayedMessages(0)
+                                  }
                                 }
                               }}
                               disabled={!selectedOption || isSubmitted}
@@ -576,7 +730,10 @@ export default function DashboardPage({ params }: { params: { domain: string } }
 
                 {/* AI 채팅 로그 카드 - 제출 후에만 표시 */}
                 {selectedDomain !== "all" && question && isSubmitted && (
-                  <Card className="border-0 neumorphic bg-card interactive-card glow-effect">
+                  <Card 
+                    ref={chatLogCardRef}
+                    className="border-0 neumorphic bg-card interactive-card glow-effect"
+                  >
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <MessageSquare className="w-5 h-5" />
@@ -587,11 +744,72 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {/* 채팅 로그가 여기에 표시될 예정 */}
-                      <div className="p-4 rounded-lg neumorphic-inset bg-muted/20">
-                        <p className="text-sm text-muted-foreground text-center">
-                          Chat log will be displayed here
-                        </p>
+                      {/* 채팅 로그 표시 */}
+                      <div ref={chatMessagesRef} className="space-y-4">
+                        {chatDialogue.length === 0 && displayedMessages === 0 ? (
+                          <div className="p-4 rounded-lg neumorphic-inset bg-muted/20">
+                            <p className="text-sm text-muted-foreground text-center">
+                              Loading chat log...
+                            </p>
+                          </div>
+                        ) : chatDialogue.length === 0 ? (
+                          <div className="p-4 rounded-lg neumorphic-inset bg-muted/20">
+                            <p className="text-sm text-muted-foreground text-center">
+                              No chat log available for this selection.
+                            </p>
+                          </div>
+                        ) : (
+                          chatDialogue.slice(0, displayedMessages).map((message, index) => {
+                            const isDoctor = message.role === "Doctor"
+                            const isLastMessage = index === displayedMessages - 1
+                            
+                            // 단어 단위로 분리 (공백 포함)
+                            const words = message.content.split(/(\s+)/)
+                            const displayedWordCount = typingProgress[index] || 0
+                            const displayedText = isDoctor 
+                              ? message.content 
+                              : words.slice(0, displayedWordCount).join("")
+                            const isCurrentlyTyping = isTyping[index] === true
+                            
+                            return (
+                              <div
+                                key={index}
+                                ref={isLastMessage ? lastMessageRef : null}
+                                className={`flex ${isDoctor ? "justify-end" : "justify-start"} animate-in fade-in slide-in-from-bottom-4 duration-500`}
+                                style={{ animationDelay: `${index * 0.1}s` }}
+                              >
+                                <div
+                                  className={`max-w-[80%] rounded-lg p-4 ${
+                                    isDoctor
+                                      ? "bg-accent text-accent-foreground neumorphic"
+                                      : "bg-muted/20 text-foreground neumorphic-inset"
+                                  }`}
+                                >
+                                  <div className="flex items-start gap-2 mb-1">
+                                    <span className="text-xs font-semibold opacity-70">
+                                      {isDoctor ? "Doctor" : "AI"}
+                                    </span>
+                                  </div>
+                                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                                    {displayedText}
+                                    {!isDoctor && isCurrentlyTyping && (
+                                      <span className="inline-block w-2 h-4 bg-foreground ml-1 animate-pulse">|</span>
+                                    )}
+                                  </p>
+                                </div>
+                              </div>
+                            )
+                          })
+                        )}
+                        {displayedMessages < chatDialogue.length && (
+                          <div className="flex justify-center py-2">
+                            <div className="flex gap-1">
+                              <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "0s" }}></div>
+                              <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                              <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
