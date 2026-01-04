@@ -24,12 +24,37 @@ export async function GET(request: Request) {
       fileName = domainFileName
     }
     
-    const filePath = path.join(process.cwd(), "lib/data", fileName)
+    // Vercel 환경에서는 process.cwd()가 다를 수 있으므로 여러 경로 시도
+    // public 폴더는 빌드에 자동으로 포함되므로 우선 시도
+    const possiblePaths = [
+      path.join(process.cwd(), "public/data", fileName), // public 폴더 우선
+      path.join(process.cwd(), "lib/data", fileName),
+      path.join(process.cwd(), ".next/server/lib/data", fileName),
+      path.join(process.cwd(), ".next/server/public/data", fileName),
+    ]
     
-    // 파일이 존재하는지 확인
-    if (!fs.existsSync(filePath)) {
+    let filePath: string | null = null
+    
+    // 가능한 경로 중에서 파일 찾기
+    for (const possiblePath of possiblePaths) {
+      if (fs.existsSync(possiblePath)) {
+        filePath = possiblePath
+        console.log("File found at:", filePath)
+        break
+      }
+    }
+    
+    if (!filePath) {
+      console.error("File not found in any of these paths:", possiblePaths)
+      console.error("Current working directory:", process.cwd())
+      console.error("__dirname equivalent:", process.cwd())
+      
       return NextResponse.json(
-        { error: `Excel file not found for domain: ${domain}` },
+        { 
+          error: `Excel file not found for domain: ${domain}`,
+          triedPaths: possiblePaths,
+          cwd: process.cwd()
+        },
         { status: 404 }
       )
     }
