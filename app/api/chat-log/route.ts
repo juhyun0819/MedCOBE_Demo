@@ -7,11 +7,12 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
   try {
-    // URL에서 domain과 selectedOption 파라미터 추출
+    // URL에서 domain, selectedOption, caseId, model 파라미터 추출
     const { searchParams } = new URL(request.url)
     const domain = searchParams.get("domain")
     const selectedOption = searchParams.get("selectedOption")
     const caseId = searchParams.get("caseId")
+    const model = searchParams.get("model") // 선택한 모델
     
     if (!domain || !selectedOption || !caseId) {
       return NextResponse.json(
@@ -53,9 +54,25 @@ export async function GET(request: Request) {
       )
     }
     
-    // 첫 번째 모델의 로그를 사용 (또는 특정 모델 선택 가능)
-    const firstModelKey = Object.keys(resultData)[0]
-    const logs = resultData[firstModelKey]?.logs || []
+    // 선택한 모델의 로그를 사용 (없으면 첫 번째 모델 사용)
+    let modelKey = model || Object.keys(resultData)[0]
+    
+    // 모델 키가 정확히 일치하지 않으면 유사한 키 찾기
+    if (!resultData[modelKey]) {
+      // 대소문자 무시하고 찾기
+      const foundKey = Object.keys(resultData).find(
+        key => key.toLowerCase() === modelKey.toLowerCase()
+      )
+      if (foundKey) {
+        modelKey = foundKey
+      } else {
+        // 여전히 없으면 첫 번째 모델 사용
+        modelKey = Object.keys(resultData)[0]
+        console.warn(`Model ${model} not found, using ${modelKey} instead`)
+      }
+    }
+    
+    const logs = resultData[modelKey]?.logs || []
     
     // case_id와 selected_option이 일치하는 로그 찾기
     // case_id와 selected_option을 문자열로 변환하여 비교

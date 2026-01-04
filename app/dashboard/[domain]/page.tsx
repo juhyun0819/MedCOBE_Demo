@@ -107,6 +107,22 @@ export default function DashboardPage({ params }: { params: { domain: string } }
 
   // 모델 기본 설정 (이미지, 색상 등)
   // Excel 파일의 모델 이름과 매핑 (Excel 이름 -> 표시 이름)
+  // result.json 파일의 모델 키와 매핑 (표시 이름 -> API 키)
+  const modelKeyMap: Record<string, string> = {
+    "GPT-5": "gpt-5",
+    "Claude-Opus-4.5": "claude-opus-4-5-20251101",
+    "GPT-4o": "gpt-4o",
+    "Claude-Sonnet-4.5": "claude-sonnet-4-5-20250929",
+    "Mistral-Large": "mistralai/mistral-large-2407",
+    "GPT-3.5-turbo": "gpt-3.5-turbo",
+    "Llama-3.3-70B": "meta-llama/llama-3.3-70b-instruct",
+    "Qwen-2.5-72B": "qwen/qwen-2.5-72b-instruct",
+    "GPT-4o-mini": "gpt-4o-mini",
+    "Phi-4": "microsoft/phi-4",
+    "Claude-Haiku-4.5": "claude-haiku-4-5-20251001",
+    "Llama-3.1-8B": "meta-llama/llama-3.1-8b-instruct",
+  }
+
   const modelConfig: Record<string, { 
     displayName: string
     colorClass: string
@@ -148,6 +164,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
   } | null>(null)
   const [selectedOption, setSelectedOption] = useState<string>("")
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false)
+  const [selectedModel, setSelectedModel] = useState<string>("") // 선택한 모델
   
   // 채팅 로그 데이터
   const [chatDialogue, setChatDialogue] = useState<Array<{
@@ -254,6 +271,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
         setQuestion(null)
         setSelectedOption("")
         setIsSubmitted(false)
+        setSelectedModel("")
         return
       }
 
@@ -265,12 +283,16 @@ export default function DashboardPage({ params }: { params: { domain: string } }
           setQuestion(data.question)
           setSelectedOption("") // 도메인 변경 시 선택 초기화
           setIsSubmitted(false) // 도메인 변경 시 제출 상태 초기화
+          setSelectedModel("") // 도메인 변경 시 모델 선택 초기화
           setChatDialogue([]) // 채팅 로그 초기화
           setDisplayedMessages(0) // 표시된 메시지 수 초기화
+          setTypingProgress({}) // 타이핑 진행도 초기화
+          setIsTyping({}) // 타이핑 상태 초기화
         } else {
           setQuestion(null)
           setSelectedOption("")
           setIsSubmitted(false)
+          setSelectedModel("")
           setChatDialogue([])
           setDisplayedMessages(0)
           setTypingProgress({})
@@ -498,6 +520,82 @@ export default function DashboardPage({ params }: { params: { domain: string } }
               </div>
 
               <TabsContent value="overview" className="space-y-6">
+                {/* 모델 선택 카드 - 도메인이 "all"이 아닐 때만 표시 */}
+                {selectedDomain !== "all" && question && (
+                  <Card className="border-0 neumorphic bg-card interactive-card glow-effect">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Code2 className="w-5 h-5" />
+                        Select AI Model
+                      </CardTitle>
+                      <CardDescription>
+                        Choose an AI model to have a conversation with
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Select
+                        value={selectedModel}
+                        onValueChange={setSelectedModel}
+                      >
+                        <SelectTrigger className="w-full neumorphic bg-muted/50">
+                          <SelectValue placeholder="Select a model to chat with">
+                            {selectedModel ? (
+                              <div className="flex items-center gap-2">
+                                {isDark ? (
+                                  <Image
+                                    src={modelConfig[selectedModel]?.imageDark || "/placeholder.svg"}
+                                    alt={modelConfig[selectedModel]?.alt || selectedModel}
+                                    width={20}
+                                    height={20}
+                                    className="object-contain"
+                                  />
+                                ) : (
+                                  <Image
+                                    src={modelConfig[selectedModel]?.imageLight || "/placeholder.svg"}
+                                    alt={modelConfig[selectedModel]?.alt || selectedModel}
+                                    width={20}
+                                    height={20}
+                                    className="object-contain"
+                                  />
+                                )}
+                                <span>{modelConfig[selectedModel]?.displayName || selectedModel}</span>
+                              </div>
+                            ) : (
+                              "Select a model"
+                            )}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent className="neumorphic bg-card">
+                          {Object.entries(modelConfig).map(([key, config]) => (
+                            <SelectItem key={key} value={key}>
+                              <div className="flex items-center gap-2">
+                                {isDark ? (
+                                  <Image
+                                    src={config.imageDark}
+                                    alt={config.alt}
+                                    width={20}
+                                    height={20}
+                                    className="object-contain"
+                                  />
+                                ) : (
+                                  <Image
+                                    src={config.imageLight}
+                                    alt={config.alt}
+                                    width={20}
+                                    height={20}
+                                    className="object-contain"
+                                  />
+                                )}
+                                <span>{config.displayName}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </CardContent>
+                  </Card>
+                )}
+
                 {/* 질문 카드 - 도메인이 "all"이 아닐 때만 표시 */}
                 {selectedDomain !== "all" && question ? (
                   <Card className="border-0 neumorphic bg-card interactive-card glow-effect">
@@ -619,13 +717,16 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                           <div className="flex justify-end pt-2">
                             <Button
                               onClick={async () => {
-                                if (selectedOption && question?.case_id) {
+                                if (selectedOption && question?.case_id && selectedModel) {
                                   setIsSubmitted(true)
                                   
                                   // 채팅 로그 가져오기
                                   try {
+                                    // 모델 이름을 API에서 사용하는 키로 변환
+                                    const modelKey = modelKeyMap[selectedModel] || selectedModel.toLowerCase().replace(/\s+/g, "-")
+                                    
                                     const response = await fetch(
-                                      `/api/chat-log?domain=${selectedDomain}&selectedOption=${selectedOption}&caseId=${question.case_id}`
+                                      `/api/chat-log?domain=${selectedDomain}&selectedOption=${selectedOption}&caseId=${question.case_id}&model=${modelKey}`
                                     )
                                     const data = await response.json()
                                     
@@ -716,7 +817,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                                   }
                                 }
                               }}
-                              disabled={!selectedOption || isSubmitted}
+                              disabled={!selectedOption || !selectedModel || isSubmitted}
                               className={`${
                                 isSubmitted && selectedOption === question.correct_option
                                   ? "bg-green-500 hover:bg-green-600"
@@ -749,9 +850,6 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                         <MessageSquare className="w-5 h-5" />
                         AI Chat Log
                       </CardTitle>
-                      <CardDescription>
-                        Conversation history with AI models
-                      </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       {/* 채팅 로그 표시 */}
