@@ -174,7 +174,22 @@ export default function DashboardPage({ params }: { params: { domain: string } }
           : `/api/medcobe-scores?domain=${selectedDomain}`
         
         const response = await fetch(apiUrl)
+        
+        if (!response.ok) {
+          console.error("API response error:", response.status, response.statusText)
+          const errorData = await response.json().catch(() => ({}))
+          console.error("Error details:", errorData)
+          throw new Error(`Failed to fetch scores: ${response.status}`)
+        }
+        
         const data = await response.json()
+        console.log("Fetched scores data:", data)
+        
+        if (data.error) {
+          console.error("API returned error:", data.error)
+          setModels([])
+          return
+        }
         
         if (data.scores && Array.isArray(data.scores)) {
           // Excel 데이터를 모델 설정과 매핑
@@ -223,13 +238,8 @@ export default function DashboardPage({ params }: { params: { domain: string } }
         }
       } catch (error) {
         console.error("Error fetching MedCOBE scores:", error)
-        // 에러 발생 시 기본 데이터 사용
-        const defaultModels = Object.entries(modelConfig).map(([name, config]) => ({
-          name,
-          percentage: 0,
-          ...config,
-        }))
-        setModels(defaultModels)
+        // 에러 발생 시 빈 배열로 설정 (기본 데이터 대신)
+        setModels([])
       }
     }
 
