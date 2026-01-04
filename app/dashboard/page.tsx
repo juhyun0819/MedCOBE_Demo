@@ -101,6 +101,106 @@ export default function DashboardPage() {
     }
   }
 
+  // 모델 기본 설정 (이미지, 색상 등)
+  // Excel 파일의 모델 이름과 매핑 (Excel 이름 -> 표시 이름)
+  const modelConfig: Record<string, { 
+    displayName: string
+    colorClass: string
+    imageDark: string
+    imageLight: string
+    alt: string
+  }> = {
+    "GPT-5": { displayName: "GPT-5", colorClass: "bg-blue-500", imageDark: "/openai_dark.png", imageLight: "/openai_light.png", alt: "GPT-5" },
+    "Claude-Opus-4.5": { displayName: "Claude-Opus-4.5", colorClass: "bg-indigo-500", imageDark: "/anthropic_dark.png", imageLight: "/anthropic_light.png", alt: "Claude-Opus-4.5" },
+    "GPT-4o": { displayName: "GPT-4o", colorClass: "bg-green-500", imageDark: "/openai_dark.png", imageLight: "/openai_light.png", alt: "GPT-4o" },
+    "Claude-Sonnet-4.5": { displayName: "Claude-Sonnet-4.5", colorClass: "bg-purple-500", imageDark: "/anthropic_dark.png", imageLight: "/anthropic_light.png", alt: "Claude-Sonnet-4.5" },
+    "Mistral-Large": { displayName: "Mistral-Large", colorClass: "bg-rose-500", imageDark: "/mistral_dark.png", imageLight: "/mistral_light.png", alt: "Mistral-Large" },
+    "GPT-3.5-turbo": { displayName: "GPT-3.5-Turbo", colorClass: "bg-amber-500", imageDark: "/openai_dark.png", imageLight: "/openai_light.png", alt: "GPT-3.5-Turbo" },
+    "Llama-3.3-70B": { displayName: "Llama-3.3-70B", colorClass: "bg-teal-500", imageDark: "/ollama_dark.png", imageLight: "/ollama_light.png", alt: "Llama-3.3-70B" },
+    "Qwen-2.5-72B": { displayName: "Qwen-2.5-72B", colorClass: "bg-emerald-500", imageDark: "/qwen_dark.png", imageLight: "/qwen_light.png", alt: "Qwen-2.5-72B" },
+    "GPT-4o-mini": { displayName: "GPT-4o-mini", colorClass: "bg-yellow-500", imageDark: "/openai_dark.png", imageLight: "/openai_light.png", alt: "GPT-4o-mini" },
+    "Phi-4": { displayName: "Phi-4", colorClass: "bg-fuchsia-500", imageDark: "/microsoft_dark.png", imageLight: "/microsoft_light.png", alt: "Phi-4" },
+    "Claude-Haiku-4.5": { displayName: "Claude-Haiku-4.5", colorClass: "bg-violet-500", imageDark: "/anthropic_dark.png", imageLight: "/anthropic_light.png", alt: "Claude-Haiku-4.5" },
+    "Llama-3.1-8B": { displayName: "Llama-3.1-8B", colorClass: "bg-cyan-500", imageDark: "/ollama_dark.png", imageLight: "/ollama_light.png", alt: "Llama-3.1-8B" },
+  }
+
+  // Excel에서 가져온 점수 데이터
+  const [models, setModels] = useState<Array<{
+    name: string
+    percentage: number
+    colorClass: string
+    imageDark: string
+    imageLight: string
+    alt: string
+  }>>([])
+
+  // Excel 파일에서 데이터 가져오기
+  useEffect(() => {
+    const fetchScores = async () => {
+      try {
+        const response = await fetch("/api/medcobe-scores")
+        const data = await response.json()
+        
+        if (data.scores && Array.isArray(data.scores)) {
+          // Excel 데이터를 모델 설정과 매핑
+          const mappedModels = data.scores
+            .map((item: { modelName: string; score: number }) => {
+              // 모델 이름 정규화
+              const normalizedName = item.modelName.trim()
+              
+              // 정확한 매칭 시도
+              let config = modelConfig[normalizedName]
+              
+              // 정확한 매칭이 없으면 유사도 기반 매칭 (대소문자 무시, 공백/하이픈 무시)
+              if (!config) {
+                const configKey = Object.keys(modelConfig).find(
+                  key => key.toLowerCase().replace(/[\s-]/g, "") === normalizedName.toLowerCase().replace(/[\s-]/g, "")
+                )
+                if (configKey) {
+                  config = modelConfig[configKey]
+                }
+              }
+              
+              // 매칭된 설정이 없으면 기본값 사용
+              if (!config) {
+                config = {
+                  displayName: normalizedName,
+                  colorClass: "bg-gray-500",
+                  imageDark: "/placeholder.svg",
+                  imageLight: "/placeholder.svg",
+                  alt: normalizedName,
+                }
+              }
+              
+              return {
+                name: config.displayName,
+                percentage: item.score,
+                colorClass: config.colorClass,
+                imageDark: config.imageDark,
+                imageLight: config.imageLight,
+                alt: config.alt,
+              }
+            })
+            .filter((model: any) => model.name) // 유효한 모델만 필터링
+            .sort((a: any, b: any) => b.percentage - a.percentage) // 퍼센트 기준 내림차순 정렬
+          
+          setModels(mappedModels)
+        }
+      } catch (error) {
+        console.error("Error fetching MedCOBE scores:", error)
+        // 에러 발생 시 기본 데이터 사용
+        const defaultModels = Object.entries(modelConfig).map(([name, config]) => ({
+          name,
+          percentage: 0,
+          ...config,
+        }))
+        setModels(defaultModels)
+      }
+    }
+
+    fetchScores()
+  }, [])
+
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       <header className="border-b border-border/30 bg-card/80 backdrop-blur-md sticky top-0 z-50 neumorphic">
@@ -163,465 +263,49 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </CardHeader>
+
+              
               <CardContent className="space-y-4">
-
-
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 flex items-center justify-center">
-                    {isDark ? (
-                      <Image 
-                        src="/openai_dark.png" 
-                        alt="Logo" 
-                        width={32} 
-                        height={32} 
-                        className="object-contain"
-                      />
-                    ) : (
-                      <Image 
-                        src="/openai_light.png" 
-                        alt="Logo" 
-                        width={32} 
-                        height={32} 
-                        className="object-contain"
-                      />
-                    )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-medium">GPT-5</p>
-                        <p className="text-xs text-muted-foreground font-semibold">70.42%</p>
+                  {models.map((model, index) => (
+                    <div key={model.name} className="flex items-center gap-2">
+                      <div className="w-10 h-10 flex items-center justify-center">
+                        {isDark ? (
+                          <Image 
+                            src={model.imageDark} 
+                            alt={model.alt} 
+                            width={32} 
+                            height={32} 
+                            className="object-contain"
+                          />
+                        ) : (
+                          <Image 
+                            src={model.imageLight} 
+                            alt={model.alt} 
+                            width={32} 
+                            height={32} 
+                            className="object-contain"
+                          />
+                        )}
                       </div>
-                      <div className="w-full bg-border rounded-full h-2 neumorphic-inset relative overflow-hidden">
-                        <div
-                          className="bg-blue-500 h-full rounded-full"
-                          style={{
-                            width: "0%",
-                            animation: "progress-fill-width 1.5s ease-out 0.1s forwards",
-                            "--progress-width": "70.42%",
-                          } as React.CSSProperties & { "--progress-width": string }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 flex items-center justify-center">
-                    {isDark ? (
-                      <Image 
-                        src="/openai_dark.png" 
-                        alt="Logo" 
-                        width={32} 
-                        height={32} 
-                        className="object-contain"
-                      />
-                    ) : (
-                      <Image 
-                        src="/openai_light.png" 
-                        alt="Logo" 
-                        width={32} 
-                        height={32} 
-                        className="object-contain"
-                      />
-                    )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-medium">GPT-4o</p>
-                        <p className="text-xs text-muted-foreground font-semibold">15.2%</p>
-                      </div>
-                      <div className="w-full bg-border rounded-full h-2 neumorphic-inset relative overflow-hidden">
-                        <div
-                          className="bg-green-500 h-full rounded-full"
-                          style={{
-                            width: "0%",
-                            animation: "progress-fill-width 1.5s ease-out 0.1s forwards",
-                            "--progress-width": "15.2%",
-                          } as React.CSSProperties & { "--progress-width": string }}
-                        ></div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <p className="text-sm font-medium">{model.name}</p>
+                          <p className="text-xs text-muted-foreground font-semibold">{model.percentage.toFixed(2)}%</p>
+                        </div>
+                        <div className="w-full bg-border rounded-full h-2 neumorphic-inset relative overflow-hidden">
+                          <div
+                            className={`${model.colorClass} h-full rounded-full`}
+                            style={{
+                              width: "0%",
+                              animation: `progress-fill-width 1.5s ease-out ${0.1 + index * 0.1}s forwards`,
+                              "--progress-width": `${model.percentage}%`,
+                            } as React.CSSProperties & { "--progress-width": string }}
+                          ></div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 flex items-center justify-center">
-                    {isDark ? (
-                      <Image 
-                        src="/openai_dark.png" 
-                        alt="Logo" 
-                        width={32} 
-                        height={32} 
-                        className="object-contain"
-                      />
-                    ) : (
-                      <Image 
-                        src="/openai_light.png" 
-                        alt="Logo" 
-                        width={32} 
-                        height={32} 
-                        className="object-contain"
-                      />
-                    )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-medium">GPT-4o-mini</p>
-                        <p className="text-xs text-muted-foreground font-semibold">10.5%</p>
-                      </div>
-                      <div className="w-full bg-border rounded-full h-2 neumorphic-inset relative overflow-hidden">
-                        <div
-                          className="bg-yellow-500 h-full rounded-full"
-                          style={{
-                            width: "0%",
-                            animation: "progress-fill-width 1.5s ease-out 0.1s forwards",
-                            "--progress-width": "10.5%",
-                          } as React.CSSProperties & { "--progress-width": string }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 flex items-center justify-center">
-                    {isDark ? (
-                      <Image 
-                        src="/openai_dark.png" 
-                        alt="Logo" 
-                        width={32} 
-                        height={32} 
-                        className="object-contain"
-                      />
-                    ) : (
-                      <Image 
-                        src="/openai_light.png" 
-                        alt="Logo" 
-                        width={32} 
-                        height={32} 
-                        className="object-contain"
-                      />
-                    )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-medium">GPT-3.5-Turbo</p>
-                        <p className="text-xs text-muted-foreground font-semibold">10.5%</p>
-                      </div>
-                      <div className="w-full bg-border rounded-full h-2 neumorphic-inset relative overflow-hidden">
-                        <div
-                          className="bg-amber-500 h-full rounded-full"
-                          style={{
-                            width: "0%",
-                            animation: "progress-fill-width 1.5s ease-out 0.1s forwards",
-                            "--progress-width": "10.5%",
-                          } as React.CSSProperties & { "--progress-width": string }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 flex items-center justify-center">
-                    {isDark ? (
-                      <Image 
-                        src="/anthropic_dark.png" 
-                        alt="Logo" 
-                        width={32} 
-                        height={32} 
-                        className="object-contain"
-                      />
-                    ) : (
-                      <Image 
-                        src="/anthropic_light.png" 
-                        alt="Logo" 
-                        width={32} 
-                        height={32} 
-                        className="object-contain"
-                      />
-                    )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-medium">Claude-Sonnet-4.5</p>
-                        <p className="text-xs text-muted-foreground font-semibold">10.5%</p>
-                      </div>
-                      <div className="w-full bg-border rounded-full h-2 neumorphic-inset relative overflow-hidden">
-                        <div
-                          className="bg-purple-500 h-full rounded-full"
-                          style={{
-                            width: "0%",
-                            animation: "progress-fill-width 1.5s ease-out 0.1s forwards",
-                            "--progress-width": "10.5%",
-                          } as React.CSSProperties & { "--progress-width": string }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 flex items-center justify-center">
-                    {isDark ? (
-                      <Image 
-                        src="/anthropic_dark.png" 
-                        alt="Logo" 
-                        width={32} 
-                        height={32} 
-                        className="object-contain"
-                      />
-                    ) : (
-                      <Image 
-                        src="/anthropic_light.png" 
-                        alt="Logo" 
-                        width={32} 
-                        height={32} 
-                        className="object-contain"
-                      />
-                    )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-medium">Claude-Opus-4.5</p>
-                        <p className="text-xs text-muted-foreground font-semibold">10.5%</p>
-                      </div>
-                      <div className="w-full bg-border rounded-full h-2 neumorphic-inset relative overflow-hidden">
-                        <div
-                          className="bg-indigo-500 h-full rounded-full"
-                          style={{
-                            width: "0%",
-                            animation: "progress-fill-width 1.5s ease-out 0.1s forwards",
-                            "--progress-width": "10.5%",
-                          } as React.CSSProperties & { "--progress-width": string }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 flex items-center justify-center">
-                    {isDark ? (
-                      <Image 
-                        src="/anthropic_dark.png" 
-                        alt="Logo" 
-                        width={32} 
-                        height={32} 
-                        className="object-contain"
-                      />
-                    ) : (
-                      <Image 
-                        src="/anthropic_light.png" 
-                        alt="Logo" 
-                        width={32} 
-                        height={32} 
-                        className="object-contain"
-                      />
-                    )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-medium">Claude-Haiku-4.5</p>
-                        <p className="text-xs text-muted-foreground font-semibold">10.5%</p>
-                      </div>
-                      <div className="w-full bg-border rounded-full h-2 neumorphic-inset relative overflow-hidden">
-                        <div
-                          className="bg-violet-500 h-full rounded-full"
-                          style={{
-                            width: "0%",
-                            animation: "progress-fill-width 1.5s ease-out 0.1s forwards",
-                            "--progress-width": "10.5%",
-                          } as React.CSSProperties & { "--progress-width": string }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 flex items-center justify-center">
-                    {isDark ? (
-                      <Image 
-                        src="/ollama_dark.png" 
-                        alt="Logo" 
-                        width={32} 
-                        height={32} 
-                        className="object-contain"
-                      />
-                    ) : (
-                      <Image 
-                        src="/ollama_light.png" 
-                        alt="Logo" 
-                        width={32} 
-                        height={32} 
-                        className="object-contain"
-                      />
-                    )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-medium">Llama-3.3-70B</p>
-                        <p className="text-xs text-muted-foreground font-semibold">10.5%</p>
-                      </div>
-                      <div className="w-full bg-border rounded-full h-2 neumorphic-inset relative overflow-hidden">
-                        <div
-                          className="bg-teal-500 h-full rounded-full"
-                          style={{
-                            width: "0%",
-                            animation: "progress-fill-width 1.5s ease-out 0.1s forwards",
-                            "--progress-width": "10.5%",
-                          } as React.CSSProperties & { "--progress-width": string }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 flex items-center justify-center">
-                    {isDark ? (
-                      <Image 
-                        src="/ollama_dark.png" 
-                        alt="Logo" 
-                        width={32} 
-                        height={32} 
-                        className="object-contain"
-                      />
-                    ) : (
-                      <Image 
-                        src="/ollama_light.png" 
-                        alt="Logo" 
-                        width={32} 
-                        height={32} 
-                        className="object-contain"
-                      />
-                    )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-medium">Llama-3.1-8B</p>
-                        <p className="text-xs text-muted-foreground font-semibold">10.5%</p>
-                      </div>
-                      <div className="w-full bg-border rounded-full h-2 neumorphic-inset relative overflow-hidden">
-                        <div
-                          className="bg-cyan-500 h-full rounded-full"
-                          style={{
-                            width: "0%",
-                            animation: "progress-fill-width 1.5s ease-out 0.1s forwards",
-                            "--progress-width": "10.5%",
-                          } as React.CSSProperties & { "--progress-width": string }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 flex items-center justify-center">
-                      {isDark ? (
-                        <Image 
-                          src="/qwen_dark.png" 
-                          alt="Qwen" 
-                          width={32} 
-                          height={32} 
-                          className="object-contain"
-                        />
-                      ) : (
-                        <Image 
-                          src="/qwen_light.png" 
-                          alt="Qwen" 
-                          width={32} 
-                          height={32} 
-                          className="object-contain"
-                        />
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-medium">Qwen2.5-72B</p>
-                        <p className="text-xs text-muted-foreground font-semibold">10.5%</p>
-                      </div>
-                      <div className="w-full bg-border rounded-full h-2 neumorphic-inset relative overflow-hidden">
-                        <div
-                          className="bg-emerald-500 h-full rounded-full"
-                          style={{
-                            width: "0%",
-                            animation: "progress-fill-width 1.5s ease-out 0.1s forwards",
-                            "--progress-width": "10.5%",
-                          } as React.CSSProperties & { "--progress-width": string }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 flex items-center justify-center">
-                      {isDark ? (
-                        <Image 
-                          src="/mistral_dark.png" 
-                          alt="Mistral" 
-                          width={32} 
-                          height={32} 
-                          className="object-contain"
-                        />
-                      ) : (
-                        <Image 
-                          src="/mistral_light.png" 
-                          alt="Mistral" 
-                          width={32} 
-                          height={32} 
-                          className="object-contain"
-                        />
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-medium">Mistral-Large</p>
-                        <p className="text-xs text-muted-foreground font-semibold">10.5%</p>
-                      </div>
-                      <div className="w-full bg-border rounded-full h-2 neumorphic-inset relative overflow-hidden">
-                        <div
-                          className="bg-rose-500 h-full rounded-full"
-                          style={{
-                            width: "0%",
-                            animation: "progress-fill-width 1.5s ease-out 0.1s forwards",
-                            "--progress-width": "10.5%",
-                          } as React.CSSProperties & { "--progress-width": string }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 flex items-center justify-center">
-                      {isDark ? (
-                        <Image 
-                          src="/microsoft_dark.png" 
-                          alt="Microsoft" 
-                          width={32} 
-                          height={32} 
-                          className="object-contain"
-                        />
-                      ) : (
-                        <Image 
-                          src="/microsoft_light.png" 
-                          alt="Microsoft" 
-                          width={32} 
-                          height={32} 
-                          className="object-contain"
-                        />
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-medium">Phi-4</p>
-                        <p className="text-xs text-muted-foreground font-semibold">10.5%</p>
-                      </div>
-                      <div className="w-full bg-border rounded-full h-2 neumorphic-inset relative overflow-hidden">
-                        <div
-                          className="bg-fuchsia-500 h-full rounded-full"
-                          style={{
-                            width: "0%",
-                            animation: "progress-fill-width 1.5s ease-out 0.1s forwards",
-                            "--progress-width": "10.5%",
-                          } as React.CSSProperties & { "--progress-width": string }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
