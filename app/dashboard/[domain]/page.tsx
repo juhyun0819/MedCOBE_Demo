@@ -336,14 +336,14 @@ export default function DashboardPage({ params }: { params: { domain: string } }
     }
   }, [selectedModel])
 
-  // 채팅 로그 카드가 나타날 때 스크롤
+  // 채팅 로그 카드가 나타날 때 페이지 맨 아래로 스크롤
   useEffect(() => {
-    if (isSubmitted && chatDialogue.length > 0 && chatLogCardRef.current) {
-      // 약간의 지연을 두고 스크롤 (카드가 렌더링된 후)
+    if (isSubmitted && chatDialogue.length > 0) {
+      // 약간의 지연을 두고 페이지 맨 아래로 스크롤
       setTimeout(() => {
-        chatLogCardRef.current?.scrollIntoView({ 
-          behavior: "smooth", 
-          block: "start" 
+        window.scrollTo({
+          top: document.documentElement.scrollHeight,
+          behavior: "smooth"
         })
       }, 100)
     }
@@ -414,30 +414,30 @@ export default function DashboardPage({ params }: { params: { domain: string } }
     displayedMessages === chatDialogue.length && 
     Object.values(isTyping).every(typing => typing === false)
 
-  // 새로운 메시지가 나타날 때마다 스크롤 (사용자가 스크롤 중이 아니고 채팅이 완료되지 않았을 때만)
+  // 새로운 메시지가 나타날 때마다 페이지 맨 아래로 스크롤 (사용자가 스크롤 중이 아니고 채팅이 완료되지 않았을 때만)
   useEffect(() => {
-    if (displayedMessages > 0 && lastMessageRef.current && !isUserScrolling && !isChatComplete) {
-      // 약간의 지연을 두고 스크롤 (메시지가 렌더링된 후)
+    if (displayedMessages > 0 && !isUserScrolling && !isChatComplete) {
+      // 약간의 지연을 두고 페이지 맨 아래로 스크롤
       setTimeout(() => {
-        if (!isUserScrolling && !isChatComplete && lastMessageRef.current) {
-          lastMessageRef.current.scrollIntoView({ 
-            behavior: "smooth", 
-            block: "end" 
+        if (!isUserScrolling && !isChatComplete) {
+          window.scrollTo({
+            top: document.documentElement.scrollHeight,
+            behavior: "smooth"
           })
         }
       }, 100)
     }
   }, [displayedMessages, isUserScrolling, isChatComplete])
 
-  // 타이핑 진행 중에도 스크롤 업데이트 (사용자가 스크롤 중이 아니고 채팅이 완료되지 않았을 때만)
+  // 타이핑 진행 중에도 페이지 맨 아래로 스크롤 업데이트 (사용자가 스크롤 중이 아니고 채팅이 완료되지 않았을 때만)
   useEffect(() => {
-    if (lastMessageRef.current && Object.keys(typingProgress).length > 0 && !isUserScrolling && !isChatComplete) {
-      // 타이핑이 진행 중일 때 스크롤 업데이트
+    if (Object.keys(typingProgress).length > 0 && !isUserScrolling && !isChatComplete) {
+      // 타이핑이 진행 중일 때 페이지 맨 아래로 스크롤 업데이트
       setTimeout(() => {
-        if (!isUserScrolling && !isChatComplete && lastMessageRef.current) {
-          lastMessageRef.current.scrollIntoView({ 
-            behavior: "smooth", 
-            block: "end" 
+        if (!isUserScrolling && !isChatComplete) {
+          window.scrollTo({
+            top: document.documentElement.scrollHeight,
+            behavior: "smooth"
           })
         }
       }, 50)
@@ -491,7 +491,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                 {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </Button>
               <Link href="/">
-                <Button size="sm" className="bg-accent hover:bg-accent/90 neumorphic-hover pulse-glow">
+                <Button size="sm" className="bg-accent hover:bg-accent/90 pulse-glow">
                   <Home className="w-4 h-4 mr-2" />
                   Home
                 </Button>
@@ -599,7 +599,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                     router.push(`/dashboard/${value}`)
                   }}
                 >
-                  <SelectTrigger className="w-[250px] neumorphic bg-muted/50">
+                  <SelectTrigger className="w-[250px] neumorphic bg-accent/20 border-2 border-accent/50">
                     <SelectValue>
                       {selectedDomain === "all" ? "All Domains" : 
                         selectedDomain === "ophthalmology" ? "Ophthalmology" :
@@ -977,22 +977,80 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                   </Card>
                 ) : null}
 
-                {/* All Domains 메시지 */}
+                {/* All Domains Instruction */}
                 {selectedDomain === "all" && (
                   <Card className="border-0 neumorphic bg-card interactive-card glow-effect">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
-                        <Activity className="w-5 h-5" />
-                        All Domains Results
+                        <BookOpen className="w-5 h-5" />
+                        How to Use
                       </CardTitle>
                       <CardDescription>
-                        Showing results for All Domains
+                        Follow these steps to evaluate AI models
                       </CardDescription>
                     </CardHeader>
-                    <CardContent>
-                      <p className="text-muted-foreground">
-                        Please select a specific domain to view case questions.
-                      </p>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-3">
+                        <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20">
+                          <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center neumorphic flex-shrink-0">
+                            <span className="text-sm font-semibold text-accent">1</span>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium mb-1">Select a Domain</p>
+                            <p className="text-xs text-muted-foreground">
+                              Choose a specific medical domain from the dropdown above (e.g., Cardiology, Neurology, etc.)
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20">
+                          <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center neumorphic flex-shrink-0">
+                            <span className="text-sm font-semibold text-accent">2</span>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium mb-1">Select an AI Model</p>
+                            <p className="text-xs text-muted-foreground">
+                              Choose an AI model from the "Select a model to chat with" dropdown
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20">
+                          <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center neumorphic flex-shrink-0">
+                            <span className="text-sm font-semibold text-accent">3</span>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium mb-1">Read the Case and Select an Option</p>
+                            <p className="text-xs text-muted-foreground">
+                              Review the case scenario and select your answer option (A, B, C, or D), then click "Submit Answer"
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20">
+                          <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center neumorphic flex-shrink-0">
+                            <span className="text-sm font-semibold text-accent">4</span>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium mb-1">Review AI Chat Log</p>
+                            <p className="text-xs text-muted-foreground">
+                              Watch the AI's response appear in the chat log below
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20">
+                          <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center neumorphic flex-shrink-0">
+                            <span className="text-sm font-semibold text-accent">5</span>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium mb-1">Click "Evaluate"</p>
+                            <p className="text-xs text-muted-foreground">
+                              Once the chat is complete, click the "Evaluate" button to see detailed evaluation of the AI's responses
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 )}

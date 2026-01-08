@@ -327,7 +327,7 @@ export default function DashboardPage() {
                     }
                   }}
                 >
-                  <SelectTrigger className="w-[250px] neumorphic bg-muted/50">
+                  <SelectTrigger className="w-[250px] neumorphic bg-accent/20 border-2 border-accent/50">
                     <SelectValue>
                       {selectedDomain === "all" ? "All Domains" : 
                         selectedDomain === "ophthalmology" ? "Ophthalmology" :
@@ -364,20 +364,79 @@ export default function DashboardPage() {
               </div>
 
               <TabsContent value="overview" className="space-y-6">
+                {/* All Domains Instruction */}
                 <Card className="border-0 neumorphic bg-card interactive-card glow-effect">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Activity className="w-5 h-5" />
-                      All Domains Results
+                      <BookOpen className="w-5 h-5" />
+                      How to Use
                     </CardTitle>
                     <CardDescription>
-                      Showing results for All Domains
+                      Follow these steps to evaluate AI models
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">
-                      All Domains results will be displayed here.
-                    </p>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20">
+                        <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center neumorphic flex-shrink-0">
+                          <span className="text-sm font-semibold text-accent">1</span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium mb-1">Select a Domain</p>
+                          <p className="text-xs text-muted-foreground">
+                            Choose a specific medical domain from the dropdown above (e.g., Cardiology, Neurology, etc.)
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20">
+                        <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center neumorphic flex-shrink-0">
+                          <span className="text-sm font-semibold text-accent">2</span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium mb-1">Select an AI Model</p>
+                          <p className="text-xs text-muted-foreground">
+                            Choose an AI model from the "Select a model to chat with" dropdown
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20">
+                        <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center neumorphic flex-shrink-0">
+                          <span className="text-sm font-semibold text-accent">3</span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium mb-1">Read the Case and Select an Option</p>
+                          <p className="text-xs text-muted-foreground">
+                            Review the case scenario and select your answer option (A, B, C, or D), then click "Submit Answer"
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20">
+                        <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center neumorphic flex-shrink-0">
+                          <span className="text-sm font-semibold text-accent">4</span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium mb-1">Review AI Chat Log</p>
+                          <p className="text-xs text-muted-foreground">
+                            Watch the AI's response appear in the chat log below
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20">
+                        <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center neumorphic flex-shrink-0">
+                          <span className="text-sm font-semibold text-accent">5</span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium mb-1">Click "Evaluate"</p>
+                          <p className="text-xs text-muted-foreground">
+                            Once the chat is complete, click the "Evaluate" button to see detailed evaluation of the AI's responses
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
