@@ -211,7 +211,7 @@ export default function DashboardPage() {
               <Link href="/" className="flex items-center gap-2">
                 <div className="w-8 h-8 relative neumorphic pulse-glow rounded-lg overflow-hidden">
                   <Image
-                    src="/logo_web.png"
+                    src="/logo_ver3.png"
                     alt="MedCOBE Logo"
                     width={32}
                     height={32}

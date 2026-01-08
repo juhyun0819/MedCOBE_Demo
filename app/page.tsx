@@ -78,14 +78,14 @@ export default function HomePage() {
               <Link href="/" className="flex items-center gap-3">
                 <div className="w-10 h-10 relative neumorphic pulse-glow rotating-logo rounded-xl overflow-hidden">
                   <Image
-                    src="/logo_web.png"
+                    src="/logo_ver3.png"
                     alt="MedCOBE Logo"
                     width={40}
                     height={40}
                     className="object-contain"
                   />
                 </div>
-                <span className="text-2xl font-heading font-bold text-foreground gradient-text">MedCOBE</span>
+                <span className="text-2xl font-heading font-bold text-foreground">MedCOBE</span>
               </Link>
             </div>
             <nav className="hidden md:flex items-center gap-8">
@@ -126,16 +126,16 @@ export default function HomePage() {
         <div className="container mx-auto text-center max-w-5xl relative z-10">
           <Badge
             variant="secondary"
-            className="mb-8 bg-accent/20 text-accent-foreground border-accent/30 neumorphic px-4 py-2 glow-effect floating-badge text-sm"
+            className="mb-8 bg-accent/20 text-accent-foreground border-accent/30 neumorphic px-4 py-2 glow-effect text-sm"
           >
             <Bot className="w-4 h-4 mr-2" />
-            Action-Level Evaluation of Clinical LLMs
+            Behavior-Level Evaluation of Clinical LLMs
           </Badge>
 
           <div className="mb-6 flex justify-center">
             <div className="fade-in-up">
               <Image
-                src="/logo_red.png"
+                src="/logo_ver3.png"
                 alt="MedCOBE Logo"
                 width={200}
                 height={200}
@@ -154,7 +154,7 @@ export default function HomePage() {
             <Link href="/dashboard">
               <Button
                 size="lg"
-                className="bg-accent hover:bg-accent/90 text-accent-foreground neumorphic-hover px-8 py-4 text-lg pulse-glow enhanced-cta"
+                className="bg-accent hover:bg-accent/90 text-accent-foreground neumorphic-hover px-8 py-4 text-lg enhanced-cta"
               >
                 <Rocket className="w-5 h-5 mr-3" />
                 Start Evaluation
@@ -173,7 +173,7 @@ export default function HomePage() {
 
         <div className="container mx-auto text-center max-w-6xl">
 
-          <Card className="border-0 neumorphic bg-card overflow-hidden repo-preview">
+          {/* <Card className="border-0 neumorphic bg-card overflow-hidden repo-preview">
             <CardContent className="p-8">
               <div className="grid md:grid-cols-2 gap-8">
                 <div>
@@ -233,7 +233,7 @@ export default function HomePage() {
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
       </section>
 

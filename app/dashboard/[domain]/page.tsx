@@ -386,12 +386,17 @@ export default function DashboardPage({ params }: { params: { domain: string } }
     }
   }, [])
 
-  // 새로운 메시지가 나타날 때마다 스크롤 (사용자가 스크롤 중이 아닐 때만)
+  // 채팅이 완료되었는지 확인 (모든 메시지가 표시되고 모든 타이핑이 완료됨)
+  const isChatComplete = chatDialogue.length > 0 && 
+    displayedMessages === chatDialogue.length && 
+    Object.values(isTyping).every(typing => typing === false)
+
+  // 새로운 메시지가 나타날 때마다 스크롤 (사용자가 스크롤 중이 아니고 채팅이 완료되지 않았을 때만)
   useEffect(() => {
-    if (displayedMessages > 0 && lastMessageRef.current && !isUserScrolling) {
+    if (displayedMessages > 0 && lastMessageRef.current && !isUserScrolling && !isChatComplete) {
       // 약간의 지연을 두고 스크롤 (메시지가 렌더링된 후)
       setTimeout(() => {
-        if (!isUserScrolling && lastMessageRef.current) {
+        if (!isUserScrolling && !isChatComplete && lastMessageRef.current) {
           lastMessageRef.current.scrollIntoView({ 
             behavior: "smooth", 
             block: "end" 
@@ -399,14 +404,14 @@ export default function DashboardPage({ params }: { params: { domain: string } }
         }
       }, 100)
     }
-  }, [displayedMessages, isUserScrolling])
+  }, [displayedMessages, isUserScrolling, isChatComplete])
 
-  // 타이핑 진행 중에도 스크롤 업데이트 (사용자가 스크롤 중이 아닐 때만)
+  // 타이핑 진행 중에도 스크롤 업데이트 (사용자가 스크롤 중이 아니고 채팅이 완료되지 않았을 때만)
   useEffect(() => {
-    if (lastMessageRef.current && Object.keys(typingProgress).length > 0 && !isUserScrolling) {
+    if (lastMessageRef.current && Object.keys(typingProgress).length > 0 && !isUserScrolling && !isChatComplete) {
       // 타이핑이 진행 중일 때 스크롤 업데이트
       setTimeout(() => {
-        if (!isUserScrolling && lastMessageRef.current) {
+        if (!isUserScrolling && !isChatComplete && lastMessageRef.current) {
           lastMessageRef.current.scrollIntoView({ 
             behavior: "smooth", 
             block: "end" 
@@ -414,7 +419,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
         }
       }, 50)
     }
-  }, [typingProgress, isUserScrolling])
+  }, [typingProgress, isUserScrolling, isChatComplete])
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
@@ -424,9 +429,9 @@ export default function DashboardPage({ params }: { params: { domain: string } }
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 hover:scale-105 transition-transform duration-300">
               <Link href="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 relative neumorphic pulse-glow rounded-lg overflow-hidden">
+                <div className="w-8 h-8 relative neumorphic rounded-lg overflow-hidden">
                   <Image
-                    src="/logo_web.png"
+                    src="/logo_ver3.png"
                     alt="MedCOBE Logo"
                     width={32}
                     height={32}
@@ -463,7 +468,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
             <Card className="border-0 neumorphic bg-card">
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 flex items-center justify-center neumorphic-inset rounded-lg">
+                  <div className="w-12 h-12 flex items-center justify-center neumorphic rounded-lg">
                     <Image 
                       src="/trophy.png" 
                       alt="Trophy" 
@@ -519,7 +524,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                           <p className="text-sm font-medium">{model.name}</p>
                           <p className="text-xs text-muted-foreground font-semibold">{model.percentage.toFixed(2)}%</p>
                         </div>
-                        <div className="w-full bg-border rounded-full h-2 neumorphic-inset relative overflow-hidden">
+                        <div className="w-full bg-border rounded-full h-2 neumorphic relative overflow-hidden">
                           <div
                             className={`${model.colorClass} h-full rounded-full`}
                             style={{
@@ -603,7 +608,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                         value={selectedModel}
                         onValueChange={setSelectedModel}
                       >
-                        <SelectTrigger className="w-full neumorphic bg-muted/50">
+                        <SelectTrigger className="w-full neumorphic bg-accent/20 border-2 border-accent/50 hover:bg-accent/30">
                           <SelectValue placeholder="Select a model to chat with">
                             {selectedModel ? (
                               <div className="flex items-center gap-2">
@@ -624,10 +629,10 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                                     className="object-contain"
                                   />
                                 )}
-                                <span>{modelConfig[selectedModel]?.displayName || selectedModel}</span>
+                                <span className="text-accent font-medium">{modelConfig[selectedModel]?.displayName || selectedModel}</span>
                               </div>
                             ) : (
-                              "Select a model"
+                              <span className="text-accent/70">Select a model</span>
                             )}
                           </SelectValue>
                         </SelectTrigger>
@@ -691,7 +696,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                             <BookOpen className="w-5 h-5" />
                             Scenario
                           </h4>
-                          <div className="p-4 rounded-lg neumorphic-inset bg-muted/20">
+                          <div className="p-4 rounded-lg neumorphic bg-muted/20">
                             <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
                               {question.scenario}
                             </p>
@@ -705,7 +710,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                             <ImageIcon className="w-5 h-5" />
                             Image Description
                           </h4>
-                          <div className="p-4 rounded-lg neumorphic-inset bg-muted/20">
+                          <div className="p-4 rounded-lg neumorphic bg-muted/20">
                             <p className="text-sm text-muted-foreground italic">
                               {question.caption}
                             </p>
@@ -752,7 +757,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                               return (
                                 <div
                                   key={key}
-                                  className={`flex items-start gap-3 p-4 rounded-lg neumorphic-inset bg-muted/20 transition-all ${
+                                  className={`flex items-start gap-3 p-4 rounded-lg neumorphic bg-muted/20 transition-all ${
                                     isSubmitted ? "" : "cursor-pointer hover:bg-muted/30"
                                   } ${borderColor} ${bgColor}`}
                                   onClick={() => {
@@ -939,13 +944,13 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                       {/* 채팅 로그 표시 */}
                       <div ref={chatMessagesRef} className="space-y-4">
                         {chatDialogue.length === 0 && displayedMessages === 0 ? (
-                          <div className="p-4 rounded-lg neumorphic-inset bg-muted/20">
+                          <div className="p-4 rounded-lg neumorphic bg-muted/20">
                             <p className="text-sm text-muted-foreground text-center">
                               Loading chat log...
                             </p>
                           </div>
                         ) : chatDialogue.length === 0 ? (
-                          <div className="p-4 rounded-lg neumorphic-inset bg-muted/20">
+                          <div className="p-4 rounded-lg neumorphic bg-muted/20">
                             <p className="text-sm text-muted-foreground text-center">
                               No chat log available for this selection.
                             </p>
@@ -974,7 +979,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                                   className={`max-w-[80%] rounded-lg p-4 ${
                                     isDoctor
                                       ? "bg-accent text-accent-foreground neumorphic"
-                                      : "bg-muted/20 text-foreground neumorphic-inset"
+                                      : "bg-muted/20 text-foreground neumorphic"
                                   }`}
                                 >
                                   <div className="flex items-start gap-2 mb-1">
@@ -1036,8 +1041,8 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="flex items-start gap-3 p-3 rounded-lg neumorphic-inset bg-muted/20 hover:bg-muted/30 transition-colors">
-                      <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center neumorphic-inset">
+                    <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20 hover:bg-muted/30 transition-colors">
+                      <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center neumorphic">
                         <GitCommit className="w-4 h-4 text-green-600 dark:text-green-400" />
                       </div>
                       <div className="flex-1">
@@ -1049,8 +1054,8 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-3 p-3 rounded-lg neumorphic-inset bg-muted/20 hover:bg-muted/30 transition-colors">
-                      <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center neumorphic-inset">
+                    <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20 hover:bg-muted/30 transition-colors">
+                      <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center neumorphic">
                         <PullRequest className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       </div>
                       <div className="flex-1">
@@ -1062,8 +1067,8 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-3 p-3 rounded-lg neumorphic-inset bg-muted/20 hover:bg-muted/30 transition-colors">
-                      <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center neumorphic-inset">
+                    <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20 hover:bg-muted/30 transition-colors">
+                      <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center neumorphic">
                         <Star className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                       </div>
                       <div className="flex-1">
@@ -1075,8 +1080,8 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-3 p-3 rounded-lg neumorphic-inset bg-muted/20 hover:bg-muted/30 transition-colors">
-                      <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center neumorphic-inset">
+                    <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20 hover:bg-muted/30 transition-colors">
+                      <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center neumorphic">
                         <AlertCircle className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                       </div>
                       <div className="flex-1">
@@ -1100,7 +1105,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                   <CardContent className="space-y-4">
                     <div className="flex items-center justify-between p-4 neumorphic bg-muted/20 rounded-lg hover:shadow-lg transition-all duration-300 interactive-card">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center neumorphic-inset">
+                        <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center neumorphic">
                           <Code2 className="w-5 h-5 text-accent" />
                         </div>
                         <div>
@@ -1125,7 +1130,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
 
                     <div className="flex items-center justify-between p-4 neumorphic bg-muted/20 rounded-lg hover:shadow-lg transition-all duration-300 interactive-card">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center neumorphic-inset">
+                        <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center neumorphic">
                           <Code2 className="w-5 h-5 text-accent" />
                         </div>
                         <div>
@@ -1150,7 +1155,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
 
                     <div className="flex items-center justify-between p-4 neumorphic bg-muted/20 rounded-lg hover:shadow-lg transition-all duration-300 interactive-card">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center neumorphic-inset">
+                        <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center neumorphic">
                           <Code2 className="w-5 h-5 text-accent" />
                         </div>
                         <div>
@@ -1303,8 +1308,8 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div className="space-y-4">
-                      <div className="flex items-start gap-4 p-4 border border-border/50 rounded-lg neumorphic-inset bg-muted/20 hover:bg-muted/30 transition-colors">
-                        <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center neumorphic-inset">
+                      <div className="flex items-start gap-4 p-4 border border-border/50 rounded-lg neumorphic bg-muted/20 hover:bg-muted/30 transition-colors">
+                        <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center neumorphic">
                           <GitCommit className="w-5 h-5 text-green-600 dark:text-green-400" />
                         </div>
                         <div className="flex-1">
@@ -1319,8 +1324,8 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                         </div>
                       </div>
 
-                      <div className="flex items-start gap-4 p-4 border border-border/50 rounded-lg neumorphic-inset bg-muted/20 hover:bg-muted/30 transition-colors">
-                        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center neumorphic-inset">
+                      <div className="flex items-start gap-4 p-4 border border-border/50 rounded-lg neumorphic bg-muted/20 hover:bg-muted/30 transition-colors">
+                        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center neumorphic">
                           <PullRequest className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div className="flex-1">
@@ -1335,8 +1340,8 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                         </div>
                       </div>
 
-                      <div className="flex items-start gap-4 p-4 border border-border/50 rounded-lg neumorphic-inset bg-muted/20 hover:bg-muted/30 transition-colors">
-                        <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center neumorphic-inset">
+                      <div className="flex items-start gap-4 p-4 border border-border/50 rounded-lg neumorphic bg-muted/20 hover:bg-muted/30 transition-colors">
+                        <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center neumorphic">
                           <AlertCircle className="w-5 h-5 text-orange-600 dark:text-orange-400" />
                         </div>
                         <div className="flex-1">
