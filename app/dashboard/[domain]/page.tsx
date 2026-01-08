@@ -1396,7 +1396,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                               className={`max-w-[80%] rounded-lg p-4 ${
                                 isDoctor
                                   ? "bg-accent text-accent-foreground neumorphic"
-                                  : "bg-gray-170 dark:bg-gray-700 text-foreground neumorphic"
+                                  : "bg-gray-100 dark:bg-gray-700 text-foreground neumorphic"
                               }`}
                             >
                               <div className="flex items-start gap-2 mb-1">
@@ -1590,7 +1590,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                                   evaluationItemRefs.current.set(aiIndex, el)
                                 }
                               }}
-                              className="p-4 rounded-lg neumorphic bg-gray-170 dark:bg-gray-700 space-y-2 transition-all duration-300 w-full max-w-[80%]"
+                              className="p-4 rounded-lg neumorphic bg-gray-100 dark:bg-gray-700 space-y-2 transition-all duration-300 w-full max-w-[80%]"
                               // onClick={() => {
                               //   // 클릭 시 채팅 로그의 해당 AI 메시지로 스크롤
                               //   const aiMessageEl = aiMessageRefs.current.get(aiIndex)
