@@ -2,7 +2,7 @@
     {
       "case_id": "0007",
       "caption": "12-Lead electrocardiogram on presentation.",
-      "scenario": "A woman in her mid-60s with a history of paroxysmal atrial fibrillation (AF) and hypertension presented to an outlying hospital with 3 days of nausea, vomiting, and diarrhea. a left ventricular ejection fraction of 60%, mild mitral regurgitation, and grade 2 diastolic dysfunction. An electrocardiogram (ECG) obtained 1 month before presentation showed sinus rhythm, PR interval of 190 milliseconds, and QRS interval of 100 milliseconds ... (Omitted)",
+      "scenario": "A woman in her mid-60s with a history of paroxysmal atrial fibrillation (AF) and hypertension presented to an outlying hospital with 3 days of nausea, vomiting, and diarrhea. a left ventricular ejection fraction of 60%, mild mitral regurgitation, and grade 2 diastolic dysfunction. An electrocardiogram (ECG) ... (Omitted)",
       "options": {
         "A": "Perform synchronized electrical cardioversion",
         "B": "Administer intravenous amiodarone",

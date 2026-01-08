@@ -170,17 +170,23 @@ export default function DashboardPage({ params }: { params: { domain: string } }
   const [chatDialogue, setChatDialogue] = useState<Array<{
     role: string
     content: string
+    action?: string
+    validity?: string
   }>>([])
+  const [chatMode, setChatMode] = useState<string | null>(null) // error 또는 correct
   const [displayedMessages, setDisplayedMessages] = useState<number>(0) // 현재까지 표시된 메시지 수
   const [typingProgress, setTypingProgress] = useState<Record<number, number>>({}) // 각 메시지의 타이핑 진행도 (인덱스 -> 표시된 단어 수)
   const [isTyping, setIsTyping] = useState<Record<number, boolean>>({}) // 각 메시지의 타이핑 완료 여부
   const [isUserScrolling, setIsUserScrolling] = useState<boolean>(false) // 사용자가 수동으로 스크롤 중인지
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null) // 스크롤 타이머
+  const [isEvaluationMode, setIsEvaluationMode] = useState<boolean>(false) // 평가 모드 활성화 여부
   
   // 스크롤을 위한 ref
   const chatLogCardRef = useRef<HTMLDivElement>(null)
   const chatMessagesRef = useRef<HTMLDivElement>(null)
   const lastMessageRef = useRef<HTMLDivElement>(null)
+  const aiMessageRefs = useRef<Map<number, HTMLDivElement>>(new Map())
+  const evaluationItemRefs = useRef<Map<number, HTMLDivElement>>(new Map())
 
   // Excel 파일에서 데이터 가져오기 (도메인별로 다른 데이터)
   useEffect(() => {
@@ -287,6 +293,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
           setIsSubmitted(false) // 도메인 변경 시 제출 상태 초기화
           setSelectedModel("") // 도메인 변경 시 모델 선택 초기화
           setChatDialogue([]) // 채팅 로그 초기화
+          setChatMode(null) // mode 초기화
           setDisplayedMessages(0) // 표시된 메시지 수 초기화
           setTypingProgress({}) // 타이핑 진행도 초기화
           setIsTyping({}) // 타이핑 상태 초기화
@@ -296,6 +303,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
           setIsSubmitted(false)
           setSelectedModel("")
           setChatDialogue([])
+          setChatMode(null)
           setDisplayedMessages(0)
           setTypingProgress({})
           setIsTyping({})
@@ -312,6 +320,21 @@ export default function DashboardPage({ params }: { params: { domain: string } }
 
     fetchQuestion()
   }, [selectedDomain]) // selectedDomain이 변경될 때마다 질문 다시 가져오기
+
+  // 모델이 변경되면 제출 전 상태로 리셋
+  useEffect(() => {
+    if (selectedModel) {
+      // 모델이 선택되면 제출 상태와 채팅 로그를 초기화
+      setIsSubmitted(false)
+      setSelectedOption("")
+      setChatDialogue([])
+      setChatMode(null)
+      setDisplayedMessages(0)
+      setTypingProgress({})
+      setIsTyping({})
+      setIsEvaluationMode(false) // 평가 모드도 리셋
+    }
+  }, [selectedModel])
 
   // 채팅 로그 카드가 나타날 때 스크롤
   useEffect(() => {
@@ -419,7 +442,28 @@ export default function DashboardPage({ params }: { params: { domain: string } }
         }
       }, 50)
     }
-  }, [typingProgress, isUserScrolling, isChatComplete])
+    
+    // 각 메시지 박스 내부 스크롤도 자동으로 조정 (사용자가 스크롤 중이 아닐 때만)
+    if (Object.keys(typingProgress).length > 0 && !isUserScrolling && !isChatComplete) {
+      // 현재 타이핑 중인 메시지의 인덱스 찾기
+      const typingIndex = Object.keys(typingProgress).find(idx => isTyping[Number(idx)])
+      if (typingIndex !== undefined) {
+        const messageIndex = Number(typingIndex)
+        // 해당 메시지 박스 내부의 스크롤을 맨 아래로
+        setTimeout(() => {
+          if (!isUserScrolling) {
+            const messageElement = chatMessagesRef.current?.children[messageIndex] as HTMLElement
+            if (messageElement) {
+              const textContainer = messageElement.querySelector('div[style*="maxHeight"]') as HTMLElement
+              if (textContainer && !isUserScrolling) {
+                textContainer.scrollTop = textContainer.scrollHeight
+              }
+            }
+          }
+        }, 50)
+      }
+    }
+  }, [typingProgress, isTyping, isUserScrolling, isChatComplete])
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
@@ -443,7 +487,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" onClick={toggleTheme} className="neumorphic-hover theme-toggle">
+              <Button variant="ghost" size="sm" onClick={toggleTheme} className="neumorphic-hover">
                 {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </Button>
               <Link href="/">
@@ -464,6 +508,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-4 gap-8">
+          {/* 왼쪽: Leaderboard */}
           <div className="lg:col-span-1">
             <Card className="border-0 neumorphic bg-card">
               <CardHeader className="pb-4">
@@ -542,7 +587,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
             </Card>
           </div>
 
-
+          {/* 오른쪽: TabsContent */}
           <div className="lg:col-span-3">
             <Tabs defaultValue="overview" className="space-y-6">
               <div className="flex items-center justify-between">
@@ -825,10 +870,12 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                                       console.error("API error:", data.error)
                                       // 에러가 있어도 빈 배열로 설정하여 로딩 상태 해제
                                       setChatDialogue([])
+                                      setChatMode(null)
                                       setDisplayedMessages(0)
                                     } else if (data.dialogue && Array.isArray(data.dialogue)) {
                                       console.log("Setting dialogue:", data.dialogue.length, "messages")
                                       setChatDialogue(data.dialogue)
+                                      setChatMode(data.mode || null) // mode 저장
                                       setDisplayedMessages(0) // 처음부터 시작
                                       setTypingProgress({}) // 타이핑 진행도 초기화
                                       setIsTyping({}) // 타이핑 상태 초기화
@@ -897,11 +944,13 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                                     } else {
                                       console.error("Invalid dialogue data:", data)
                                       setChatDialogue([])
+                                      setChatMode(null)
                                       setDisplayedMessages(0)
                                     }
                                   } catch (error) {
                                     console.error("Error fetching chat log:", error)
                                     setChatDialogue([])
+                                    setChatMode(null)
                                     setDisplayedMessages(0)
                                   }
                                 }
@@ -927,90 +976,6 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                     </CardContent>
                   </Card>
                 ) : null}
-
-                {/* AI 채팅 로그 카드 - 제출 후에만 표시 */}
-                {selectedDomain !== "all" && question && isSubmitted && (
-                  <Card 
-                    ref={chatLogCardRef}
-                    className="border-0 neumorphic bg-card interactive-card glow-effect"
-                  >
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <MessageSquare className="w-5 h-5" />
-                        AI Chat Log
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {/* 채팅 로그 표시 */}
-                      <div ref={chatMessagesRef} className="space-y-4">
-                        {chatDialogue.length === 0 && displayedMessages === 0 ? (
-                          <div className="p-4 rounded-lg neumorphic bg-muted/20">
-                            <p className="text-sm text-muted-foreground text-center">
-                              Loading chat log...
-                            </p>
-                          </div>
-                        ) : chatDialogue.length === 0 ? (
-                          <div className="p-4 rounded-lg neumorphic bg-muted/20">
-                            <p className="text-sm text-muted-foreground text-center">
-                              No chat log available for this selection.
-                            </p>
-                          </div>
-                        ) : (
-                          chatDialogue.slice(0, displayedMessages).map((message, index) => {
-                            const isDoctor = message.role === "Doctor"
-                            const isLastMessage = index === displayedMessages - 1
-                            
-                            // 단어 단위로 분리 (공백 포함)
-                            const words = message.content.split(/(\s+)/)
-                            const displayedWordCount = typingProgress[index] || 0
-                            const displayedText = isDoctor 
-                              ? message.content 
-                              : words.slice(0, displayedWordCount).join("")
-                            const isCurrentlyTyping = isTyping[index] === true
-                            
-                            return (
-                              <div
-                                key={index}
-                                ref={isLastMessage ? lastMessageRef : null}
-                                className={`flex ${isDoctor ? "justify-end" : "justify-start"} animate-in fade-in slide-in-from-bottom-4 duration-500`}
-                                style={{ animationDelay: `${index * 0.1}s` }}
-                              >
-                                <div
-                                  className={`max-w-[80%] rounded-lg p-4 ${
-                                    isDoctor
-                                      ? "bg-accent text-accent-foreground neumorphic"
-                                      : "bg-muted/20 text-foreground neumorphic"
-                                  }`}
-                                >
-                                  <div className="flex items-start gap-2 mb-1">
-                                    <span className="text-xs font-semibold opacity-70">
-                                      {isDoctor ? "Doctor" : "AI"}
-                                    </span>
-                                  </div>
-                                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                                    {displayedText}
-                                    {!isDoctor && isCurrentlyTyping && (
-                                      <span className="inline-block w-2 h-4 bg-foreground ml-1 animate-pulse">|</span>
-                                    )}
-                                  </p>
-                                </div>
-                              </div>
-                            )
-                          })
-                        )}
-                        {displayedMessages < chatDialogue.length && (
-                          <div className="flex justify-center py-2">
-                            <div className="flex gap-1">
-                              <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "0s" }}></div>
-                              <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-                              <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
 
                 {/* All Domains 메시지 */}
                 {selectedDomain === "all" && (
@@ -1360,6 +1325,383 @@ export default function DashboardPage({ params }: { params: { domain: string } }
             </Tabs>
           </div>
         </div>
+        
+        {/* 채팅 로그 및 평가 영역 - Leaderboard 아래에 배치 */}
+        {selectedDomain !== "all" && question && isSubmitted && (
+          <div className={`grid gap-8 mt-8 transition-all duration-500 ease-in-out ${isEvaluationMode ? 'lg:grid-cols-2' : 'lg:grid-cols-1'}`}>
+            {/* 채팅 로그 카드 */}
+            <div className={`lg:col-span-1 transition-all duration-500 ease-in-out ${isEvaluationMode ? 'transform translate-x-0' : ''}`}>
+              <Card 
+                ref={chatLogCardRef}
+                className="border-0 neumorphic bg-card interactive-card glow-effect transition-all duration-500 ease-in-out"
+              >
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MessageSquare className="w-5 h-5" />
+                    AI Chat Log
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* 채팅 로그 표시 */}
+                  <div ref={chatMessagesRef} className="space-y-4">
+                    {chatDialogue.length === 0 && displayedMessages === 0 ? (
+                      <div className="p-4 rounded-lg neumorphic bg-muted/20">
+                        <p className="text-sm text-muted-foreground text-center">
+                          Loading chat log...
+                        </p>
+                      </div>
+                    ) : chatDialogue.length === 0 ? (
+                      <div className="p-4 rounded-lg neumorphic bg-muted/20">
+                        <p className="text-sm text-muted-foreground text-center">
+                          No chat log available for this selection.
+                        </p>
+                      </div>
+                    ) : (
+                      chatDialogue.slice(0, displayedMessages).map((message, index) => {
+                        const isDoctor = message.role === "Doctor"
+                        const isLastMessage = index === displayedMessages - 1
+                        
+                        // 단어 단위로 분리 (공백 포함)
+                        const words = message.content.split(/(\s+)/)
+                        const displayedWordCount = typingProgress[index] || 0
+                        const displayedText = isDoctor 
+                          ? message.content 
+                          : words.slice(0, displayedWordCount).join("")
+                        const isCurrentlyTyping = isTyping[index] === true
+                        
+                        // AI 메시지인 경우 ref 저장
+                        const setAiMessageRef = (el: HTMLDivElement | null) => {
+                          if (el && !isDoctor) {
+                            // AI 메시지의 원래 인덱스를 키로 사용
+                            const aiIndex = chatDialogue.slice(0, index).filter(m => m.role === "AI").length
+                            aiMessageRefs.current.set(aiIndex, el)
+                          }
+                        }
+                        
+                        return (
+                          <div
+                            key={index}
+                            ref={(el) => {
+                              if (isLastMessage && el) {
+                                (lastMessageRef as React.MutableRefObject<HTMLDivElement | null>).current = el
+                              }
+                              if (!isDoctor && el) {
+                                setAiMessageRef(el)
+                              }
+                            }}
+                            className={`flex ${isDoctor ? "justify-end" : "justify-start"} animate-in fade-in slide-in-from-bottom-4 duration-500`}
+                            style={{ animationDelay: `${index * 0.1}s` }}
+                          >
+                            <div
+                              className={`max-w-[80%] rounded-lg p-4 ${
+                                isDoctor
+                                  ? "bg-accent text-accent-foreground neumorphic"
+                                  : "bg-gray-170 dark:bg-gray-700 text-foreground neumorphic"
+                              }`}
+                            >
+                              <div className="flex items-start gap-2 mb-1">
+                                <span className="text-xs font-semibold opacity-70">
+                                  {isDoctor ? "Doctor" : "AI"}
+                                </span>
+                              </div>
+                              <div
+                                className="text-sm leading-relaxed whitespace-pre-wrap"
+                                style={{
+                                  maxHeight: "300px",
+                                  overflowY: "auto",
+                                  overflowX: "hidden"
+                                }}
+                                ref={(el) => {
+                                  // 타이핑 중일 때 자동으로 스크롤을 맨 아래로 (사용자가 스크롤 중이 아닐 때만)
+                                  if (el && isCurrentlyTyping && !isDoctor && !isUserScrolling) {
+                                    // requestAnimationFrame을 사용하여 스크롤을 부드럽게
+                                    requestAnimationFrame(() => {
+                                      if (!isUserScrolling) {
+                                        el.scrollTop = el.scrollHeight
+                                      }
+                                    })
+                                  }
+                                }}
+                                onScroll={(e) => {
+                                  // 사용자가 메시지 박스 내부를 스크롤하면 사용자 스크롤 상태로 설정
+                                  const target = e.currentTarget
+                                  const isAtBottom = target.scrollTop + target.clientHeight >= target.scrollHeight - 1
+                                  
+                                  // 사용자가 스크롤을 올리면 (맨 아래가 아니면) 사용자 스크롤 상태로 설정
+                                  if (!isAtBottom) {
+                                    setIsUserScrolling(true)
+                                    if (scrollTimeoutRef.current) {
+                                      clearTimeout(scrollTimeoutRef.current)
+                                    }
+                                    scrollTimeoutRef.current = setTimeout(() => {
+                                      setIsUserScrolling(false)
+                                    }, 2000)
+                                  }
+                                }}
+                                onWheel={(e) => {
+                                  // 내부 스크롤이 맨 위에 있고 위로 스크롤하려고 하면 전체 창 스크롤
+                                  const target = e.currentTarget
+                                  const isAtTop = target.scrollTop === 0
+                                  const isScrollingUp = e.deltaY < 0
+                                  
+                                  if (isAtTop && isScrollingUp) {
+                                    // 전체 창 스크롤 허용
+                                    e.stopPropagation()
+                                    window.scrollBy({
+                                      top: e.deltaY,
+                                      behavior: "auto"
+                                    })
+                                  }
+                                  
+                                  // 내부 스크롤이 맨 아래에 있고 아래로 스크롤하려고 하면 전체 창 스크롤
+                                  const isAtBottom = target.scrollTop + target.clientHeight >= target.scrollHeight - 1
+                                  const isScrollingDown = e.deltaY > 0
+                                  
+                                  if (isAtBottom && isScrollingDown) {
+                                    // 전체 창 스크롤 허용
+                                    e.stopPropagation()
+                                    window.scrollBy({
+                                      top: e.deltaY,
+                                      behavior: "auto"
+                                    })
+                                  }
+                                  
+                                  // 사용자가 스크롤을 올리면 사용자 스크롤 상태로 설정
+                                  if (isScrollingUp && !isAtTop) {
+                                    setIsUserScrolling(true)
+                                    if (scrollTimeoutRef.current) {
+                                      clearTimeout(scrollTimeoutRef.current)
+                                    }
+                                    scrollTimeoutRef.current = setTimeout(() => {
+                                      setIsUserScrolling(false)
+                                    }, 2000)
+                                  }
+                                }}
+                              >
+                                {displayedText}
+                                {!isDoctor && isCurrentlyTyping && (
+                                  <span className="inline-block w-2 h-4 bg-foreground ml-1 animate-pulse">|</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })
+                    )}
+                    {displayedMessages < chatDialogue.length && (
+                      <div className="flex justify-center py-2">
+                        <div className="flex gap-1">
+                          <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "0s" }}></div>
+                          <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                          <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  {/* Evaluate 버튼 - 채팅이 완료되었을 때만 표시 */}
+                  {isChatComplete && !isEvaluationMode && (
+                    <div className="flex justify-center pt-4">
+                      <Button
+                        onClick={() => setIsEvaluationMode(true)}
+                        className="bg-accent hover:bg-accent/90 neumorphic-hover pulse-glow"
+                      >
+                        <Star className="w-4 h-4 mr-2" />
+                        Evaluate
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+            {/* 평가 창 - 평가 모드일 때만 표시 */}
+            {isEvaluationMode && (
+              <div className="lg:col-span-1 animate-in slide-in-from-right-4 fade-in duration-500">
+                <Card className="border-0 neumorphic bg-card interactive-card glow-effect">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Star className="w-5 h-5" />
+                      AI Response Evaluation
+                    </CardTitle>
+                    <CardDescription>
+                      Evaluate the AI's responses in this conversation
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* 전체 대화 구조 반영 - Doctor 발화는 보이지 않게 */}
+                    {chatDialogue.map((message, index) => {
+                      const isDoctor = message.role === "Doctor"
+                      const aiIndex = chatDialogue.slice(0, index).filter(m => m.role === "AI").length
+                      
+                      if (isDoctor) {
+                        // Doctor 발화는 실제로 렌더링하되 보이지 않게, 높이는 실제 높이에서 50px 뺀 값
+                        return (
+                          <div
+                            key={index}
+                            className={`flex ${isDoctor ? "justify-end" : "justify-start"}`}
+                            style={{ opacity: 0, pointerEvents: "none" }}
+                            ref={(el) => {
+                              if (el) {
+                                // 실제 높이를 측정하고 50px을 뺀 값으로 설정
+                                const measureHeight = () => {
+                                  const actualHeight = el.scrollHeight
+                                  if (actualHeight > 50) {
+                                    el.style.height = `${actualHeight - 50}px`
+                                    el.style.overflow = "hidden"
+                                  }
+                                }
+                                // 즉시 측정
+                                measureHeight()
+                                // 약간의 지연 후 다시 측정 (렌더링 완료 후)
+                                setTimeout(measureHeight, 0)
+                              }
+                            }}
+                          >
+                            <div
+                              className="max-w-[80%] rounded-lg p-4 bg-accent text-accent-foreground neumorphic"
+                            >
+                              <div className="flex items-start gap-2 mb-1">
+                                <span className="text-xs font-semibold opacity-70">
+                                  Doctor
+                                </span>
+                              </div>
+                              <div
+                                className="text-sm leading-relaxed whitespace-pre-wrap"
+                                style={{
+                                  maxHeight: "300px",
+                                  overflowY: "auto",
+                                  overflowX: "hidden"
+                                }}
+                              >
+                                {message.content}
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      } else {
+                        // AI 발화는 정상적으로 표시
+                        return (
+                          <div
+                            key={index}
+                            className="flex justify-start"
+                          >
+                            <div
+                              ref={(el) => {
+                                if (el) {
+                                  evaluationItemRefs.current.set(aiIndex, el)
+                                }
+                              }}
+                              className="p-4 rounded-lg neumorphic bg-gray-170 dark:bg-gray-700 space-y-2 transition-all duration-300 w-full max-w-[80%]"
+                              // onClick={() => {
+                              //   // 클릭 시 채팅 로그의 해당 AI 메시지로 스크롤
+                              //   const aiMessageEl = aiMessageRefs.current.get(aiIndex)
+                              //   if (aiMessageEl) {
+                              //     aiMessageEl.scrollIntoView({ behavior: "smooth", block: "center" })
+                              //     // 하이라이트 효과
+                              //     aiMessageEl.style.transition = "all 0.3s"
+                              //     aiMessageEl.style.boxShadow = "0 0 20px rgba(99, 102, 241, 0.5)"
+                              //     setTimeout(() => {
+                              //       aiMessageEl.style.boxShadow = ""
+                              //     }, 2000)
+                              //   }
+                              // }}
+                              // style={{ cursor: "pointer" }}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-semibold text-muted-foreground">
+                                  AI Response {aiIndex + 1}
+                                </span>
+                                <span className="text-xs text-muted-foreground/60">
+                                  Message #{index + 1}
+                                </span>
+                              </div>
+                              {/* Action과 Validity 표시 */}
+                              {message.action && message.validity && chatMode && (() => {
+                                // mode=error일 때: ARGUE, VALID → 초록색 / ACCEPT, INVALID → 빨간색
+                                // mode=correct일 때: ACCEPT, VALID → 초록색 / ARGUE, INVALID → 빨간색
+                                const getActionColor = () => {
+                                  if (chatMode === "error") {
+                                    return message.action === "ARGUE" 
+                                      ? "bg-green-500/20 text-green-700 dark:text-green-400 border border-green-500/30"
+                                      : "bg-red-500/20 text-red-700 dark:text-red-400 border border-red-500/30"
+                                  } else {
+                                    return message.action === "ACCEPT"
+                                      ? "bg-green-500/20 text-green-700 dark:text-green-400 border border-green-500/30"
+                                      : "bg-red-500/20 text-red-700 dark:text-red-400 border border-red-500/30"
+                                  }
+                                }
+                                
+                                const getValidityColor = () => {
+                                  if (chatMode === "error") {
+                                    return message.validity === "VALID"
+                                      ? "bg-green-500/20 text-green-700 dark:text-green-400 border border-green-500/30"
+                                      : "bg-red-500/20 text-red-700 dark:text-red-400 border border-red-500/30"
+                                  } else {
+                                    return message.validity === "VALID"
+                                      ? "bg-green-500/20 text-green-700 dark:text-green-400 border border-green-500/30"
+                                      : "bg-red-500/20 text-red-700 dark:text-red-400 border border-red-500/30"
+                                  }
+                                }
+                                
+                                return (
+                                  <div className="flex gap-2 mb-2">
+                                    <div className={`px-3 py-1 rounded text-sm font-semibold ${getActionColor()}`}>
+                                      {message.action}
+                                    </div>
+                                    <div className={`px-3 py-1 rounded text-sm font-semibold ${getValidityColor()}`}>
+                                      {message.validity}
+                                    </div>
+                                  </div>
+                                )
+                              })()}
+                              <div
+                                className="text-sm leading-relaxed whitespace-pre-wrap"
+                                style={{
+                                  maxHeight: "300px",
+                                  overflowY: "auto",
+                                  overflowX: "hidden"
+                                }}
+                                onWheel={(e) => {
+                                  // 내부 스크롤이 맨 위에 있고 위로 스크롤하려고 하면 전체 창 스크롤
+                                  const target = e.currentTarget
+                                  const isAtTop = target.scrollTop === 0
+                                  const isScrollingUp = e.deltaY < 0
+                                  
+                                  if (isAtTop && isScrollingUp) {
+                                    // 전체 창 스크롤 허용
+                                    e.stopPropagation()
+                                    window.scrollBy({
+                                      top: e.deltaY,
+                                      behavior: "auto"
+                                    })
+                                  }
+                                  
+                                  // 내부 스크롤이 맨 아래에 있고 아래로 스크롤하려고 하면 전체 창 스크롤
+                                  const isAtBottom = target.scrollTop + target.clientHeight >= target.scrollHeight - 1
+                                  const isScrollingDown = e.deltaY > 0
+                                  
+                                  if (isAtBottom && isScrollingDown) {
+                                    // 전체 창 스크롤 허용
+                                    e.stopPropagation()
+                                    window.scrollBy({
+                                      top: e.deltaY,
+                                      behavior: "auto"
+                                    })
+                                  }
+                                }}
+                              >
+                                {message.content}
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      }
+                    })}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )

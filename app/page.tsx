@@ -31,11 +31,11 @@ export default function HomePage() {
 
   const codeWords = ["git clone", "npm install", "git commit", "git push", "npm run dev", "git merge"]
 
-  useEffect(() => {
-    // 항상 dark 모드로 시작
-    setIsDark(true)
-    document.documentElement.classList.add("dark")
-  }, [])
+  // useEffect(() => {
+  //   // 항상 dark 모드로 시작
+  //   setIsDark(true)
+  //   document.documentElement.classList.add("dark")
+  // }, [])
 
   useEffect(() => {
     const currentWord = codeWords[currentWordIndex]
@@ -107,13 +107,19 @@ export default function HomePage() {
               >
                 Paper
               </a>
+              <a
+                href="#code" /* TODO: Add code page */
+                className="text-muted-foreground hover:text-foreground transition-all duration-500 font-medium nav-link"
+              >
+                Code
+              </a>
             </nav>
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" onClick={toggleTheme} className="neumorphic-hover theme-toggle">
+              <Button variant="ghost" size="sm" onClick={toggleTheme} className="neumorphic-hover">
                 {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </Button>
               <Link href="/dashboard">
-                <Button size="sm" className="bg-accent hover:bg-accent/90 neumorphic-hover pulse-glow cta-button">
+                <Button size="sm" className="bg-accent hover:bg-accent/90 neumorphic-hover cta-button">
                   Get Started
                 </Button>
               </Link>
@@ -122,15 +128,15 @@ export default function HomePage() {
         </div>
       </header>
 
-      <section className="py-24 px-6 aurora-bg enhanced-aurora">
+      <section className="px-6 aurora-bg enhanced-aurora" style={{ paddingTop: '60px', paddingBottom: '60px' }}>
         <div className="container mx-auto text-center max-w-5xl relative z-10">
-          <Badge
+          {/* <Badge
             variant="secondary"
-            className="mb-8 bg-accent/20 text-accent-foreground border-accent/30 neumorphic px-4 py-2 glow-effect text-sm"
+            className="mb-8 bg-accent/50 text-accent-foreground border-accent/40 px-4 py-2 text-sm"
           >
             <Bot className="w-4 h-4 mr-2" />
             Behavior-Level Evaluation of Clinical LLMs
-          </Badge>
+          </Badge> */}
 
           <div className="mb-6 flex justify-center">
             <div className="fade-in-up">
@@ -150,28 +156,40 @@ export default function HomePage() {
           <p className="text-xl text-muted-foreground text-balance mb-12 leading-relaxed max-w-3xl mx-auto fade-in-up">
           This is an interactive demo of the MedCOBE framework, designed to showcase how collaborative behaviors between clinicians and LLMs are evaluated under controlled settings.
           </p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
-            <Link href="/dashboard">
+          <div className="flex flex-col gap-6 justify-center mb-16">
+            <div className="flex flex-row justify-center gap-6">
+              <Link href="/dashboard">
+                <Button
+                  size="lg"
+                  className="bg-accent hover:bg-accent/90 px-8 py-4 text-lg"
+                >
+                  <Rocket className="w-5 h-5 mr-3" />
+                  Start Evaluation
+                </Button>
+              </Link>
+            </div>
+            <div className="flex flex-row justify-center gap-6">
               <Button
                 size="lg"
-                className="bg-accent hover:bg-accent/90 text-accent-foreground neumorphic-hover px-8 py-4 text-lg enhanced-cta"
+                variant="outline"
+                className="neumorphic-hover px-8 py-4 text-lg bg-transparent demo-button"
               >
-                <Rocket className="w-5 h-5 mr-3" />
-                Start Evaluation
+                <Eye className="w-5 h-5 mr-3" />
+                Full Paper
               </Button>
-            </Link>
-            <Button
-              size="lg"
-              variant="outline"
-              className="neumorphic-hover px-8 py-4 text-lg bg-transparent demo-button"
-            >
-              <Eye className="w-5 h-5 mr-3" />
-              Full Paper
-            </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="neumorphic-hover px-8 py-4 text-lg bg-transparent demo-button"
+              >
+                <Code className="w-5 h-5 mr-3" />
+                Code
+              </Button>
+            </div>
           </div>
         </div>
 
-        <div className="container mx-auto text-center max-w-6xl">
+        {/* <div className="container mx-auto text-center max-w-6xl"> */}
 
           {/* <Card className="border-0 neumorphic bg-card overflow-hidden repo-preview">
             <CardContent className="p-8">
@@ -234,7 +252,7 @@ export default function HomePage() {
               </div>
             </CardContent>
           </Card> */}
-        </div>
+        {/* </div> */}
       </section>
 
       <footer className="border-t border-border/30 bg-card py-5 px-6 neumorphic footer-glow">

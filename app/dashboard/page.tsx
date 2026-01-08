@@ -209,7 +209,7 @@ export default function DashboardPage() {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 hover:scale-105 transition-transform duration-300">
               <Link href="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 relative neumorphic pulse-glow rounded-lg overflow-hidden">
+                <div className="w-8 h-8 relative neumorphic rounded-lg overflow-hidden">
                   <Image
                     src="/logo_ver3.png"
                     alt="MedCOBE Logo"
@@ -223,11 +223,11 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" onClick={toggleTheme} className="neumorphic-hover theme-toggle">
+              <Button variant="ghost" size="sm" onClick={toggleTheme}>
                 {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </Button>
               <Link href="/">
-                <Button size="sm" className="bg-accent hover:bg-accent/90 neumorphic-hover pulse-glow">
+                <Button size="sm" className="bg-accent hover:bg-accent/90">
                   <Home className="w-4 h-4 mr-2" />
                   Home
                 </Button>
