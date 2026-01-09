@@ -351,7 +351,7 @@ export default function DashboardPage() {
                     <SelectItem value="neurology">Neurology</SelectItem>
                   </SelectContent>
                 </Select>
-                <div className="flex items-center gap-2">
+                {/* <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" className="neumorphic-hover bg-transparent">
                     <Filter className="w-4 h-4 mr-2" />
                     Filter
@@ -360,7 +360,7 @@ export default function DashboardPage() {
                     <Calendar className="w-4 h-4 mr-2" />
                     This Week
                   </Button>
-                </div>
+                </div> */}
               </div>
 
               <TabsContent value="overview" className="space-y-6">

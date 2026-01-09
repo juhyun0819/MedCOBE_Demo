@@ -624,14 +624,14 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                   </SelectContent>
                 </Select>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="neumorphic-hover bg-transparent">
+                  {/* <Button variant="outline" size="sm" className="neumorphic-hover bg-transparent">
                     <Filter className="w-4 h-4 mr-2" />
                     Filter
                   </Button>
                   <Button variant="outline" size="sm" className="neumorphic-hover bg-transparent">
                     <Calendar className="w-4 h-4 mr-2" />
                     This Week
-                  </Button>
+                  </Button> */}
                 </div>
               </div>
 
