@@ -990,8 +990,8 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      <div className="space-y-3">
-                        <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="flex flex-col items-start gap-3 p-4 rounded-lg neumorphic bg-muted/20">
                           <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center neumorphic flex-shrink-0">
                             <span className="text-sm font-semibold text-accent">1</span>
                           </div>
@@ -1003,7 +1003,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                           </div>
                         </div>
                         
-                        <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20">
+                        <div className="flex flex-col items-start gap-3 p-4 rounded-lg neumorphic bg-muted/20">
                           <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center neumorphic flex-shrink-0">
                             <span className="text-sm font-semibold text-accent">2</span>
                           </div>
@@ -1015,7 +1015,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                           </div>
                         </div>
                         
-                        <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20">
+                        <div className="flex flex-col items-start gap-3 p-4 rounded-lg neumorphic bg-muted/20">
                           <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center neumorphic flex-shrink-0">
                             <span className="text-sm font-semibold text-accent">3</span>
                           </div>
@@ -1027,21 +1027,9 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                           </div>
                         </div>
                         
-                        <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20">
+                        <div className="flex flex-col items-start gap-3 p-4 rounded-lg neumorphic bg-muted/20">
                           <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center neumorphic flex-shrink-0">
                             <span className="text-sm font-semibold text-accent">4</span>
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-sm font-medium mb-1">Review AI Chat Log</p>
-                            <p className="text-xs text-muted-foreground">
-                              Watch the AI's response appear in the chat log below
-                            </p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20">
-                          <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center neumorphic flex-shrink-0">
-                            <span className="text-sm font-semibold text-accent">5</span>
                           </div>
                           <div className="flex-1">
                             <p className="text-sm font-medium mb-1">Click "Evaluate"</p>
@@ -1051,343 +1039,31 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                           </div>
                         </div>
                       </div>
+                      {/* Instruction Video */}
+                      <div className="mt-6 flex justify-center">
+                        <video
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          className="rounded-lg neumorphic max-w-full h-auto"
+                          style={{ maxWidth: "800px" }}
+                        >
+                          <source src="/instruction.mp4" type="video/mp4" />
+                          <source src="/instruction.mov" type="video/quicktime" />
+                          Your browser does not support the video tag.
+                        </video>
+                      </div>
                     </CardContent>
                   </Card>
                 )}
               </TabsContent>
-              {/* <TabsContent value="overview" className="space-y-6">
-                <Card className="border-0 neumorphic bg-card interactive-card glow-effect">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Activity className="w-5 h-5" />
-                      Recent Activity
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20 hover:bg-muted/30 transition-colors">
-                      <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center neumorphic">
-                        <GitCommit className="w-4 h-4 text-green-600 dark:text-green-400" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm">
-                          <span className="font-medium">Pushed 3 commits</span> to{" "}
-                          <span className="text-accent">awesome-project</span>
-                        </p>
-                        <p className="text-xs text-muted-foreground">2 hours ago</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20 hover:bg-muted/30 transition-colors">
-                      <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center neumorphic">
-                        <PullRequest className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm">
-                          <span className="font-medium">Opened pull request</span> in{" "}
-                          <span className="text-accent">web-components</span>
-                        </p>
-                        <p className="text-xs text-muted-foreground">5 hours ago</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20 hover:bg-muted/30 transition-colors">
-                      <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center neumorphic">
-                        <Star className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm">
-                          <span className="font-medium">Starred</span>{" "}
-                          <span className="text-accent">react-hooks-library</span>
-                        </p>
-                        <p className="text-xs text-muted-foreground">1 day ago</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20 hover:bg-muted/30 transition-colors">
-                      <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center neumorphic">
-                        <AlertCircle className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm">
-                          <span className="font-medium">Closed issue</span> in{" "}
-                          <span className="text-accent">mobile-app</span>
-                        </p>
-                        <p className="text-xs text-muted-foreground">2 days ago</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-0 neumorphic bg-card interactive-card glow-effect">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5" />
-                      Top Repositories
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between p-4 neumorphic bg-muted/20 rounded-lg hover:shadow-lg transition-all duration-300 interactive-card">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center neumorphic">
-                          <Code2 className="w-5 h-5 text-accent" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-foreground">awesome-project</h4>
-                          <p className="text-sm text-muted-foreground">Modern web application</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4" />
-                          <span>234</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <GitFork className="w-4 h-4" />
-                          <span>45</span>
-                        </div>
-                        <Badge variant="secondary" className="neumorphic">
-                          TypeScript
-                        </Badge>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 neumorphic bg-muted/20 rounded-lg hover:shadow-lg transition-all duration-300 interactive-card">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center neumorphic">
-                          <Code2 className="w-5 h-5 text-accent" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-foreground">web-components</h4>
-                          <p className="text-sm text-muted-foreground">Reusable UI components</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4" />
-                          <span>189</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <GitFork className="w-4 h-4" />
-                          <span>32</span>
-                        </div>
-                        <Badge variant="secondary" className="neumorphic">
-                          React
-                        </Badge>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 neumorphic bg-muted/20 rounded-lg hover:shadow-lg transition-all duration-300 interactive-card">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center neumorphic">
-                          <Code2 className="w-5 h-5 text-accent" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-foreground">mobile-app</h4>
-                          <p className="text-sm text-muted-foreground">Cross-platform mobile app</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4" />
-                          <span>156</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <GitFork className="w-4 h-4" />
-                          <span>28</span>
-                        </div>
-                        <Badge variant="secondary" className="neumorphic">
-                          React Native
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="repositories" className="space-y-6">
-                <Card className="border-0 neumorphic bg-card interactive-card">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle>Your Repositories</CardTitle>
-                      <Button size="sm" className="bg-accent hover:bg-accent/90 neumorphic-hover pulse-glow">
-                        <Plus className="w-4 h-4 mr-2" />
-                        New Repository
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-4">
-                      <div className="border-b border-border/50 pb-4">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h3 className="text-lg font-medium text-accent hover:underline cursor-pointer">
-                              awesome-project
-                            </h3>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              A modern web application built with Next.js and TypeScript
-                            </p>
-                            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                              <div className="flex items-center gap-1">
-                                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                                <span>TypeScript</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Star className="w-4 h-4" />
-                                <span>234</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <GitFork className="w-4 h-4" />
-                                <span>45</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                                <span>Updated 2 hours ago</span>
-                              </div>
-                            </div>
-                          </div>
-                          <Button variant="outline" size="sm" className="neumorphic-hover bg-transparent">
-                            <Star className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-
-                      <div className="border-b border-border/50 pb-4">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h3 className="text-lg font-medium text-accent hover:underline cursor-pointer">
-                              web-components
-                            </h3>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              A collection of reusable React components with TypeScript support
-                            </p>
-                            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                              <div className="flex items-center gap-1">
-                                <div className="w-3 h-3 bg-cyan-500 rounded-full"></div>
-                                <span>React</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Star className="w-4 h-4" />
-                                <span>189</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <GitFork className="w-4 h-4" />
-                                <span>32</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                                <span>Updated 5 hours ago</span>
-                              </div>
-                            </div>
-                          </div>
-                          <Button variant="outline" size="sm" className="neumorphic-hover bg-transparent">
-                            <Star className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-
-                      <div className="border-b border-border/50 pb-4">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h3 className="text-lg font-medium text-accent hover:underline cursor-pointer">
-                              mobile-app
-                            </h3>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              Cross-platform mobile application built with React Native
-                            </p>
-                            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                              <div className="flex items-center gap-1">
-                                <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                                <span>React Native</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Star className="w-4 h-4" />
-                                <span>156</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <GitFork className="w-4 h-4" />
-                                <span>28</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                                <span>Updated 1 day ago</span>
-                              </div>
-                            </div>
-                          </div>
-                          <Button variant="outline" size="sm" className="neumorphic-hover bg-transparent">
-                            <Star className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="activity" className="space-y-6">
-                <Card className="border-0 neumorphic bg-card interactive-card glow-effect">
-                  <CardHeader>
-                    <CardTitle>Activity Feed</CardTitle>
-                    <CardDescription>Your recent development activity across all repositories</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="space-y-4">
-                      <div className="flex items-start gap-4 p-4 border border-border/50 rounded-lg neumorphic bg-muted/20 hover:bg-muted/30 transition-colors">
-                        <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center neumorphic">
-                          <GitCommit className="w-5 h-5 text-green-600 dark:text-green-400" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm">
-                            <span className="font-medium">Pushed 3 commits</span> to{" "}
-                            <span className="text-accent">awesome-project</span>
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            feat: add user authentication, fix: resolve mobile layout issues, docs: update README
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-2">2 hours ago</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start gap-4 p-4 border border-border/50 rounded-lg neumorphic bg-muted/20 hover:bg-muted/30 transition-colors">
-                        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center neumorphic">
-                          <PullRequest className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm">
-                            <span className="font-medium">Opened pull request #42</span> in{" "}
-                            <span className="text-accent">web-components</span>
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Add new Button component with accessibility improvements
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-2">5 hours ago</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start gap-4 p-4 border border-border/50 rounded-lg neumorphic bg-muted/20 hover:bg-muted/30 transition-colors">
-                        <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center neumorphic">
-                          <AlertCircle className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm">
-                            <span className="font-medium">Closed issue #28</span> in{" "}
-                            <span className="text-accent">mobile-app</span>
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">Fixed navigation bug on Android devices</p>
-                          <p className="text-xs text-muted-foreground mt-2">1 day ago</p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent> */}
             </Tabs>
           </div>
         </div>
         
-        {/* 채팅 로그 및 평가 영역 - Leaderboard 아래에 배치 */}
         {selectedDomain !== "all" && question && isSubmitted && (
           <div className={`grid gap-8 mt-8 transition-all duration-500 ease-in-out ${isEvaluationMode ? 'lg:grid-cols-2' : 'lg:grid-cols-1'}`}>
-            {/* 채팅 로그 카드 */}
             <div className={`lg:col-span-1 transition-all duration-500 ease-in-out ${isEvaluationMode ? 'transform translate-x-0' : ''}`}>
               <Card 
                 ref={chatLogCardRef}
@@ -1400,7 +1076,6 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* 채팅 로그 표시 */}
                   <div ref={chatMessagesRef} className="space-y-4">
                     {chatDialogue.length === 0 && displayedMessages === 0 ? (
                       <div className="p-4 rounded-lg neumorphic bg-muted/20">
@@ -1419,7 +1094,6 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                         const isDoctor = message.role === "Doctor"
                         const isLastMessage = index === displayedMessages - 1
                         
-                        // 단어 단위로 분리 (공백 포함)
                         const words = message.content.split(/(\s+)/)
                         const displayedWordCount = typingProgress[index] || 0
                         const displayedText = isDoctor 
@@ -1427,10 +1101,8 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                           : words.slice(0, displayedWordCount).join("")
                         const isCurrentlyTyping = isTyping[index] === true
                         
-                        // AI 메시지인 경우 ref 저장
                         const setAiMessageRef = (el: HTMLDivElement | null) => {
                           if (el && !isDoctor) {
-                            // AI 메시지의 원래 인덱스를 키로 사용
                             const aiIndex = chatDialogue.slice(0, index).filter(m => m.role === "AI").length
                             aiMessageRefs.current.set(aiIndex, el)
                           }
@@ -1470,9 +1142,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                                   overflowX: "hidden"
                                 }}
                                 ref={(el) => {
-                                  // 타이핑 중일 때 자동으로 스크롤을 맨 아래로 (사용자가 스크롤 중이 아닐 때만)
                                   if (el && isCurrentlyTyping && !isDoctor && !isUserScrolling) {
-                                    // requestAnimationFrame을 사용하여 스크롤을 부드럽게
                                     requestAnimationFrame(() => {
                                       if (!isUserScrolling) {
                                         el.scrollTop = el.scrollHeight
@@ -1481,11 +1151,9 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                                   }
                                 }}
                                 onScroll={(e) => {
-                                  // 사용자가 메시지 박스 내부를 스크롤하면 사용자 스크롤 상태로 설정
                                   const target = e.currentTarget
                                   const isAtBottom = target.scrollTop + target.clientHeight >= target.scrollHeight - 1
                                   
-                                  // 사용자가 스크롤을 올리면 (맨 아래가 아니면) 사용자 스크롤 상태로 설정
                                   if (!isAtBottom) {
                                     setIsUserScrolling(true)
                                     if (scrollTimeoutRef.current) {
@@ -1497,13 +1165,11 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                                   }
                                 }}
                                 onWheel={(e) => {
-                                  // 내부 스크롤이 맨 위에 있고 위로 스크롤하려고 하면 전체 창 스크롤
                                   const target = e.currentTarget
                                   const isAtTop = target.scrollTop === 0
                                   const isScrollingUp = e.deltaY < 0
                                   
                                   if (isAtTop && isScrollingUp) {
-                                    // 전체 창 스크롤 허용
                                     e.stopPropagation()
                                     window.scrollBy({
                                       top: e.deltaY,
@@ -1511,20 +1177,16 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                                     })
                                   }
                                   
-                                  // 내부 스크롤이 맨 아래에 있고 아래로 스크롤하려고 하면 전체 창 스크롤
                                   const isAtBottom = target.scrollTop + target.clientHeight >= target.scrollHeight - 1
                                   const isScrollingDown = e.deltaY > 0
                                   
                                   if (isAtBottom && isScrollingDown) {
-                                    // 전체 창 스크롤 허용
                                     e.stopPropagation()
                                     window.scrollBy({
                                       top: e.deltaY,
                                       behavior: "auto"
                                     })
                                   }
-                                  
-                                  // 사용자가 스크롤을 올리면 사용자 스크롤 상태로 설정
                                   if (isScrollingUp && !isAtTop) {
                                     setIsUserScrolling(true)
                                     if (scrollTimeoutRef.current) {
@@ -1556,7 +1218,6 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                       </div>
                     )}
                   </div>
-                  {/* Evaluate 버튼 - 채팅이 완료되었을 때만 표시 */}
                   {isChatComplete && !isEvaluationMode && (
                     <div className="flex justify-center pt-4">
                       <Button
@@ -1571,7 +1232,6 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                 </CardContent>
               </Card>
             </div>
-            {/* 평가 창 - 평가 모드일 때만 표시 */}
             {isEvaluationMode && (
               <div className="lg:col-span-1 animate-in slide-in-from-right-4 fade-in duration-500">
                 <Card className="border-0 neumorphic bg-card interactive-card glow-effect">
@@ -1585,13 +1245,11 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {/* 전체 대화 구조 반영 - Doctor 발화는 보이지 않게 */}
                     {chatDialogue.map((message, index) => {
                       const isDoctor = message.role === "Doctor"
                       const aiIndex = chatDialogue.slice(0, index).filter(m => m.role === "AI").length
                       
                       if (isDoctor) {
-                        // Doctor 발화는 실제로 렌더링하되 보이지 않게, 높이는 실제 높이에서 50px 뺀 값
                         return (
                           <div
                             key={index}
@@ -1599,7 +1257,6 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                             style={{ opacity: 0, pointerEvents: "none" }}
                             ref={(el) => {
                               if (el) {
-                                // 실제 높이를 측정하고 50px을 뺀 값으로 설정
                                 const measureHeight = () => {
                                   const actualHeight = el.scrollHeight
                                   if (actualHeight > 50) {
@@ -1607,9 +1264,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                                     el.style.overflow = "hidden"
                                   }
                                 }
-                                // 즉시 측정
                                 measureHeight()
-                                // 약간의 지연 후 다시 측정 (렌더링 완료 후)
                                 setTimeout(measureHeight, 0)
                               }
                             }}
@@ -1636,7 +1291,6 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                           </div>
                         )
                       } else {
-                        // AI 발화는 정상적으로 표시
                         return (
                           <div
                             key={index}
@@ -1648,22 +1302,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                                   evaluationItemRefs.current.set(aiIndex, el)
                                 }
                               }}
-                              className="p-4 rounded-lg neumorphic bg-gray-100 dark:bg-gray-700 space-y-2 transition-all duration-300 w-full max-w-[80%]"
-                              // onClick={() => {
-                              //   // 클릭 시 채팅 로그의 해당 AI 메시지로 스크롤
-                              //   const aiMessageEl = aiMessageRefs.current.get(aiIndex)
-                              //   if (aiMessageEl) {
-                              //     aiMessageEl.scrollIntoView({ behavior: "smooth", block: "center" })
-                              //     // 하이라이트 효과
-                              //     aiMessageEl.style.transition = "all 0.3s"
-                              //     aiMessageEl.style.boxShadow = "0 0 20px rgba(99, 102, 241, 0.5)"
-                              //     setTimeout(() => {
-                              //       aiMessageEl.style.boxShadow = ""
-                              //     }, 2000)
-                              //   }
-                              // }}
-                              // style={{ cursor: "pointer" }}
-                            >
+                              className="p-4 rounded-lg neumorphic bg-gray-100 dark:bg-gray-700 space-y-2 transition-all duration-300 w-full max-w-[80%]">
                               <div className="flex items-center justify-between mb-2">
                                 <span className="text-xs font-semibold text-muted-foreground">
                                   AI Response {aiIndex + 1}
@@ -1672,10 +1311,7 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                                   Message #{index + 1}
                                 </span>
                               </div>
-                              {/* Action과 Validity 표시 */}
                               {message.action && message.validity && chatMode && (() => {
-                                // mode=error일 때: ARGUE, VALID → 초록색 / ACCEPT, INVALID → 빨간색
-                                // mode=correct일 때: ACCEPT, VALID → 초록색 / ARGUE, INVALID → 빨간색
                                 const getActionColor = () => {
                                   if (chatMode === "error") {
                                     return message.action === "ARGUE" 
@@ -1719,13 +1355,11 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                                   overflowX: "hidden"
                                 }}
                                 onWheel={(e) => {
-                                  // 내부 스크롤이 맨 위에 있고 위로 스크롤하려고 하면 전체 창 스크롤
                                   const target = e.currentTarget
                                   const isAtTop = target.scrollTop === 0
                                   const isScrollingUp = e.deltaY < 0
                                   
                                   if (isAtTop && isScrollingUp) {
-                                    // 전체 창 스크롤 허용
                                     e.stopPropagation()
                                     window.scrollBy({
                                       top: e.deltaY,
@@ -1733,12 +1367,10 @@ export default function DashboardPage({ params }: { params: { domain: string } }
                                     })
                                   }
                                   
-                                  // 내부 스크롤이 맨 아래에 있고 아래로 스크롤하려고 하면 전체 창 스크롤
                                   const isAtBottom = target.scrollTop + target.clientHeight >= target.scrollHeight - 1
                                   const isScrollingDown = e.deltaY > 0
                                   
                                   if (isAtBottom && isScrollingDown) {
-                                    // 전체 창 스크롤 허용
                                     e.stopPropagation()
                                     window.scrollBy({
                                       top: e.deltaY,

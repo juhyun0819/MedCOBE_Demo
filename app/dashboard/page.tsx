@@ -376,8 +376,8 @@ export default function DashboardPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="space-y-3">
-                      <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="flex flex-col items-start gap-3 p-4 rounded-lg neumorphic bg-muted/20">
                         <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center neumorphic flex-shrink-0">
                           <span className="text-sm font-semibold text-accent">1</span>
                         </div>
@@ -389,7 +389,7 @@ export default function DashboardPage() {
                         </div>
                       </div>
                       
-                      <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20">
+                      <div className="flex flex-col items-start gap-3 p-4 rounded-lg neumorphic bg-muted/20">
                         <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center neumorphic flex-shrink-0">
                           <span className="text-sm font-semibold text-accent">2</span>
                         </div>
@@ -401,7 +401,7 @@ export default function DashboardPage() {
                         </div>
                       </div>
                       
-                      <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20">
+                      <div className="flex flex-col items-start gap-3 p-4 rounded-lg neumorphic bg-muted/20">
                         <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center neumorphic flex-shrink-0">
                           <span className="text-sm font-semibold text-accent">3</span>
                         </div>
@@ -413,21 +413,9 @@ export default function DashboardPage() {
                         </div>
                       </div>
                       
-                      <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20">
+                      <div className="flex flex-col items-start gap-3 p-4 rounded-lg neumorphic bg-muted/20">
                         <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center neumorphic flex-shrink-0">
                           <span className="text-sm font-semibold text-accent">4</span>
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium mb-1">Review AI Chat Log</p>
-                          <p className="text-xs text-muted-foreground">
-                            Watch the AI's response appear in the chat log below
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start gap-3 p-3 rounded-lg neumorphic bg-muted/20">
-                        <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center neumorphic flex-shrink-0">
-                          <span className="text-sm font-semibold text-accent">5</span>
                         </div>
                         <div className="flex-1">
                           <p className="text-sm font-medium mb-1">Click "Evaluate"</p>
@@ -437,334 +425,24 @@ export default function DashboardPage() {
                         </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              {/* <TabsContent value="overview" className="space-y-6">
-                <Card className="border-0 neumorphic bg-card interactive-card glow-effect">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Activity className="w-5 h-5" />
-                      Recent Activity
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-start gap-3 p-3 rounded-lg neumorphic-inset bg-muted/20 hover:bg-muted/30 transition-colors">
-                      <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center neumorphic-inset">
-                        <GitCommit className="w-4 h-4 text-green-600 dark:text-green-400" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm">
-                          <span className="font-medium">Pushed 3 commits</span> to{" "}
-                          <span className="text-accent">awesome-project</span>
-                        </p>
-                        <p className="text-xs text-muted-foreground">2 hours ago</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3 p-3 rounded-lg neumorphic-inset bg-muted/20 hover:bg-muted/30 transition-colors">
-                      <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center neumorphic-inset">
-                        <PullRequest className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm">
-                          <span className="font-medium">Opened pull request</span> in{" "}
-                          <span className="text-accent">web-components</span>
-                        </p>
-                        <p className="text-xs text-muted-foreground">5 hours ago</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3 p-3 rounded-lg neumorphic-inset bg-muted/20 hover:bg-muted/30 transition-colors">
-                      <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center neumorphic-inset">
-                        <Star className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm">
-                          <span className="font-medium">Starred</span>{" "}
-                          <span className="text-accent">react-hooks-library</span>
-                        </p>
-                        <p className="text-xs text-muted-foreground">1 day ago</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3 p-3 rounded-lg neumorphic-inset bg-muted/20 hover:bg-muted/30 transition-colors">
-                      <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center neumorphic-inset">
-                        <AlertCircle className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm">
-                          <span className="font-medium">Closed issue</span> in{" "}
-                          <span className="text-accent">mobile-app</span>
-                        </p>
-                        <p className="text-xs text-muted-foreground">2 days ago</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-0 neumorphic bg-card interactive-card glow-effect">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5" />
-                      Top Repositories
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between p-4 neumorphic bg-muted/20 rounded-lg hover:shadow-lg transition-all duration-300 interactive-card">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center neumorphic-inset">
-                          <Code2 className="w-5 h-5 text-accent" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-foreground">awesome-project</h4>
-                          <p className="text-sm text-muted-foreground">Modern web application</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4" />
-                          <span>234</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <GitFork className="w-4 h-4" />
-                          <span>45</span>
-                        </div>
-                        <Badge variant="secondary" className="neumorphic">
-                          TypeScript
-                        </Badge>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 neumorphic bg-muted/20 rounded-lg hover:shadow-lg transition-all duration-300 interactive-card">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center neumorphic-inset">
-                          <Code2 className="w-5 h-5 text-accent" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-foreground">web-components</h4>
-                          <p className="text-sm text-muted-foreground">Reusable UI components</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4" />
-                          <span>189</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <GitFork className="w-4 h-4" />
-                          <span>32</span>
-                        </div>
-                        <Badge variant="secondary" className="neumorphic">
-                          React
-                        </Badge>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 neumorphic bg-muted/20 rounded-lg hover:shadow-lg transition-all duration-300 interactive-card">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center neumorphic-inset">
-                          <Code2 className="w-5 h-5 text-accent" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-foreground">mobile-app</h4>
-                          <p className="text-sm text-muted-foreground">Cross-platform mobile app</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4" />
-                          <span>156</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <GitFork className="w-4 h-4" />
-                          <span>28</span>
-                        </div>
-                        <Badge variant="secondary" className="neumorphic">
-                          React Native
-                        </Badge>
-                      </div>
+                    {/* Instruction Video */}
+                    <div className="mt-6 flex justify-center">
+                      <video
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="rounded-lg neumorphic max-w-full h-auto"
+                        style={{ maxWidth: "800px" }}
+                      >
+                        <source src="/instruction.mp4" type="video/mp4" />
+                        <source src="/instruction.mov" type="video/quicktime" />
+                        Your browser does not support the video tag.
+                      </video>
                     </div>
                   </CardContent>
                 </Card>
               </TabsContent>
-
-              <TabsContent value="repositories" className="space-y-6">
-                <Card className="border-0 neumorphic bg-card interactive-card">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle>Your Repositories</CardTitle>
-                      <Button size="sm" className="bg-accent hover:bg-accent/90 neumorphic-hover pulse-glow">
-                        <Plus className="w-4 h-4 mr-2" />
-                        New Repository
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-4">
-                      <div className="border-b border-border/50 pb-4">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h3 className="text-lg font-medium text-accent hover:underline cursor-pointer">
-                              awesome-project
-                            </h3>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              A modern web application built with Next.js and TypeScript
-                            </p>
-                            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                              <div className="flex items-center gap-1">
-                                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                                <span>TypeScript</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Star className="w-4 h-4" />
-                                <span>234</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <GitFork className="w-4 h-4" />
-                                <span>45</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                                <span>Updated 2 hours ago</span>
-                              </div>
-                            </div>
-                          </div>
-                          <Button variant="outline" size="sm" className="neumorphic-hover bg-transparent">
-                            <Star className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-
-                      <div className="border-b border-border/50 pb-4">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h3 className="text-lg font-medium text-accent hover:underline cursor-pointer">
-                              web-components
-                            </h3>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              A collection of reusable React components with TypeScript support
-                            </p>
-                            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                              <div className="flex items-center gap-1">
-                                <div className="w-3 h-3 bg-cyan-500 rounded-full"></div>
-                                <span>React</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Star className="w-4 h-4" />
-                                <span>189</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <GitFork className="w-4 h-4" />
-                                <span>32</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                                <span>Updated 5 hours ago</span>
-                              </div>
-                            </div>
-                          </div>
-                          <Button variant="outline" size="sm" className="neumorphic-hover bg-transparent">
-                            <Star className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-
-                      <div className="border-b border-border/50 pb-4">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h3 className="text-lg font-medium text-accent hover:underline cursor-pointer">
-                              mobile-app
-                            </h3>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              Cross-platform mobile application built with React Native
-                            </p>
-                            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                              <div className="flex items-center gap-1">
-                                <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                                <span>React Native</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Star className="w-4 h-4" />
-                                <span>156</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <GitFork className="w-4 h-4" />
-                                <span>28</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                                <span>Updated 1 day ago</span>
-                              </div>
-                            </div>
-                          </div>
-                          <Button variant="outline" size="sm" className="neumorphic-hover bg-transparent">
-                            <Star className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="activity" className="space-y-6">
-                <Card className="border-0 neumorphic bg-card interactive-card glow-effect">
-                  <CardHeader>
-                    <CardTitle>Activity Feed</CardTitle>
-                    <CardDescription>Your recent development activity across all repositories</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div className="space-y-4">
-                      <div className="flex items-start gap-4 p-4 border border-border/50 rounded-lg neumorphic-inset bg-muted/20 hover:bg-muted/30 transition-colors">
-                        <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center neumorphic-inset">
-                          <GitCommit className="w-5 h-5 text-green-600 dark:text-green-400" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm">
-                            <span className="font-medium">Pushed 3 commits</span> to{" "}
-                            <span className="text-accent">awesome-project</span>
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            feat: add user authentication, fix: resolve mobile layout issues, docs: update README
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-2">2 hours ago</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start gap-4 p-4 border border-border/50 rounded-lg neumorphic-inset bg-muted/20 hover:bg-muted/30 transition-colors">
-                        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center neumorphic-inset">
-                          <PullRequest className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm">
-                            <span className="font-medium">Opened pull request #42</span> in{" "}
-                            <span className="text-accent">web-components</span>
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Add new Button component with accessibility improvements
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-2">5 hours ago</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start gap-4 p-4 border border-border/50 rounded-lg neumorphic-inset bg-muted/20 hover:bg-muted/30 transition-colors">
-                        <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center neumorphic-inset">
-                          <AlertCircle className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm">
-                            <span className="font-medium">Closed issue #28</span> in{" "}
-                            <span className="text-accent">mobile-app</span>
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">Fixed navigation bug on Android devices</p>
-                          <p className="text-xs text-muted-foreground mt-2">1 day ago</p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent> */}
             </Tabs>
           </div>
         </div>
